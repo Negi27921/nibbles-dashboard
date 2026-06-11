@@ -889,6 +889,190 @@ function getTopProducts(content) {
   return Object.entries(prodCount).sort((a, b) => b[1] - a[1]).map(([product, count]) => ({ product, count }));
 }
 
+// ─── Google Search Console API ───
+const { google } = require('googleapis');
+
+function getSearchConsoleAuth() {
+  const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!keyJson) return null;
+  try {
+    const key = JSON.parse(keyJson);
+    return new google.auth.GoogleAuth({
+      credentials: key,
+      scopes: ['https://www.googleapis.com/auth/webmasters.readonly']
+    });
+  } catch (e) { console.error('GSC auth error:', e.message); return null; }
+}
+
+// Fetch Search Console data for a specific page or all pages
+app.get('/api/search-console/pages', async (req, res) => {
+  const auth = getSearchConsoleAuth();
+  if (!auth) return res.json({ connected: false, error: 'Google Service Account not configured', data: [] });
+
+  try {
+    const searchconsole = google.searchconsole({ version: 'v1', auth });
+    const siteUrl = 'sc-domain:thenibbles.shop';
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate28 = new Date(Date.now() - 28 * 86400000).toISOString().split('T')[0];
+
+    const response = await searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: startDate28,
+        endDate,
+        dimensions: ['page'],
+        rowLimit: 100,
+        dimensionFilterGroups: [{
+          filters: [{ dimension: 'page', operator: 'contains', expression: '/blogs/' }]
+        }]
+      }
+    });
+
+    const pages = (response.data.rows || []).map(row => ({
+      page: row.keys[0],
+      clicks: row.clicks,
+      impressions: row.impressions,
+      ctr: Math.round(row.ctr * 10000) / 100,
+      position: Math.round(row.position * 10) / 10
+    }));
+
+    res.json({ connected: true, data: pages, period: { start: startDate28, end: endDate } });
+  } catch (e) {
+    console.error('GSC API error:', e.message);
+    res.json({ connected: false, error: e.message, data: [] });
+  }
+});
+
+// Fetch top queries for a specific page
+app.get('/api/search-console/queries', async (req, res) => {
+  const auth = getSearchConsoleAuth();
+  if (!auth) return res.json({ connected: false, data: [] });
+
+  try {
+    const searchconsole = google.searchconsole({ version: 'v1', auth });
+    const pageUrl = req.query.page;
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate28 = new Date(Date.now() - 28 * 86400000).toISOString().split('T')[0];
+
+    const response = await searchconsole.searchanalytics.query({
+      siteUrl: 'sc-domain:thenibbles.shop',
+      requestBody: {
+        startDate: startDate28,
+        endDate,
+        dimensions: ['query'],
+        rowLimit: 10,
+        dimensionFilterGroups: pageUrl ? [{
+          filters: [{ dimension: 'page', operator: 'equals', expression: pageUrl }]
+        }] : []
+      }
+    });
+
+    res.json({
+      connected: true,
+      data: (response.data.rows || []).map(row => ({
+        query: row.keys[0],
+        clicks: row.clicks,
+        impressions: row.impressions,
+        ctr: Math.round(row.ctr * 10000) / 100,
+        position: Math.round(row.position * 10) / 10
+      }))
+    });
+  } catch (e) {
+    res.json({ connected: false, error: e.message, data: [] });
+  }
+});
+
+// ─── Blog Metrics CRUD ───
+
+// Get all blog metrics
+app.get('/api/blog-metrics', async (req, res) => {
+  if (!supabase) return res.json([]);
+  const { data, error } = await supabase.from('blog_metrics').select('*').order('updated_at', { ascending: false });
+  if (error) return res.json([]);
+  res.json(data || []);
+});
+
+// Upsert blog metrics (save before/after data)
+app.post('/api/blog-metrics', async (req, res) => {
+  if (!supabase) return res.status(400).json({ error: 'Supabase not connected' });
+  const m = req.body;
+  const { data, error } = await supabase.from('blog_metrics').upsert(m, { onConflict: 'article_title' }).select();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, data: data?.[0] });
+});
+
+// Sync Search Console data into blog_metrics table
+app.post('/api/blog-metrics/sync', async (req, res) => {
+  const auth = getSearchConsoleAuth();
+  if (!auth) return res.json({ synced: false, error: 'GSC not connected' });
+  if (!supabase) return res.json({ synced: false, error: 'Supabase not connected' });
+
+  try {
+    const searchconsole = google.searchconsole({ version: 'v1', auth });
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate28 = new Date(Date.now() - 28 * 86400000).toISOString().split('T')[0];
+
+    const response = await searchconsole.searchanalytics.query({
+      siteUrl: 'sc-domain:thenibbles.shop',
+      requestBody: {
+        startDate: startDate28,
+        endDate,
+        dimensions: ['page'],
+        rowLimit: 100,
+        dimensionFilterGroups: [{
+          filters: [{ dimension: 'page', operator: 'contains', expression: '/blogs/' }]
+        }]
+      }
+    });
+
+    const pages = response.data.rows || [];
+    let synced = 0;
+
+    for (const row of pages) {
+      const url = row.keys[0];
+      const title = decodeURIComponent(url.split('/').pop().replace(/-/g, ' ')).replace(/^\w/, c => c.toUpperCase());
+
+      // Check if record exists
+      const { data: existing } = await supabase.from('blog_metrics').select('*').eq('article_url', url).limit(1);
+
+      if (existing && existing.length > 0) {
+        // Update "after" metrics
+        await supabase.from('blog_metrics').update({
+          after_clicks: row.clicks,
+          after_impressions: row.impressions,
+          after_ctr: Math.round(row.ctr * 10000) / 100,
+          after_position: Math.round(row.position * 10) / 10,
+          after_date: endDate,
+          updated_at: new Date().toISOString()
+        }).eq('article_url', url);
+      } else {
+        // New entry — set both before and after to current (baseline)
+        await supabase.from('blog_metrics').insert({
+          article_title: title,
+          article_url: url,
+          optimized: false,
+          before_clicks: row.clicks,
+          before_impressions: row.impressions,
+          before_ctr: Math.round(row.ctr * 10000) / 100,
+          before_position: Math.round(row.position * 10) / 10,
+          before_date: endDate,
+          after_clicks: row.clicks,
+          after_impressions: row.impressions,
+          after_ctr: Math.round(row.ctr * 10000) / 100,
+          after_position: Math.round(row.position * 10) / 10,
+          after_date: endDate
+        });
+      }
+      synced++;
+    }
+
+    res.json({ synced: true, count: synced, period: { start: startDate28, end: endDate } });
+  } catch (e) {
+    console.error('Sync error:', e.message);
+    res.json({ synced: false, error: e.message });
+  }
+});
+
 // Serve dashboard (catch-all)
 app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

@@ -189,6 +189,21 @@ tr:hover td{background:rgba(255,196,0,.06)}
 .marquee-track .hl{color:var(--yellow)}
 @keyframes marquee{to{transform:translateX(-50%)}}
 
+/* ─── DELTA INDICATORS ─── */
+.delta{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:6px}
+.delta-up{color:var(--green);background:var(--green-bg)}
+.delta-down{color:var(--red);background:#fef2f2}
+.delta-flat{color:var(--ink-soft);background:var(--paper-2)}
+.metric-cell{text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px}
+.metric-cell .before{color:var(--ink-soft);font-size:10px}
+.metric-cell .after{font-weight:700;font-size:13px}
+.metric-cell .arrow{color:var(--ink-soft);font-size:9px;margin:0 2px}
+.impact-badge{display:inline-block;padding:3px 10px;border-radius:8px;font-family:'Bangers',cursive;font-size:14px;letter-spacing:.06em;border:2px solid var(--ink)}
+.impact-positive{background:var(--green-bg);color:var(--green)}
+.impact-negative{background:#fef2f2;color:var(--red)}
+.impact-neutral{background:var(--paper-2);color:var(--ink-soft)}
+.impact-new{background:#dbeafe;color:var(--blue)}
+
 /* ─── MODAL ─── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(21,21,28,.6);z-index:9500;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-overlay.active{display:flex}
@@ -283,22 +298,6 @@ tr:hover td{background:rgba(255,196,0,.06)}
     </button>
   </div>
 
-  <div id="supabase-banner" class="card mb-16" style="display:none;border-color:var(--orange);background:var(--orange-bg)">
-    <div class="card-body" style="padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:20px">&#9888;&#65039;</span>
-        <div><strong style="font-size:14px">Supabase Not Connected</strong><br><span style="font-size:12px;color:var(--ink-soft)">Run history won't persist across deploys. Add SUPABASE_URL & SUPABASE_ANON_KEY to Vercel env vars.</span></div>
-      </div>
-      <a href="https://supabase.com/dashboard" target="_blank" rel="noopener" class="btn btn-ghost"><span>Setup Supabase</span></a>
-    </div>
-  </div>
-  <div id="supabase-ok" class="card mb-16" style="display:none;border-color:var(--green);background:var(--green-bg)">
-    <div class="card-body" style="padding:10px 22px;display:flex;align-items:center;gap:10px">
-      <span style="font-size:18px">&#9989;</span>
-      <span style="font-size:13px;font-weight:600;color:var(--green)">Supabase Connected — All runs, content & results are persisted</span>
-    </div>
-  </div>
-
   <div class="stats-grid">
     <div class="stat-card sc-total" data-tooltip="Total blog articles on thenibbles.shop"><div class="stat-icon">&#128240;</div><div class="stat-value" id="stat-total">51</div><div class="stat-label">Total Articles</div></div>
     <div class="stat-card sc-done" data-tooltip="Articles with Key Takeaways + FAQ + product links"><div class="stat-icon">&#9989;</div><div class="stat-value" id="stat-optimized">7</div><div class="stat-label">Optimized</div></div>
@@ -379,15 +378,87 @@ tr:hover td{background:rgba(255,196,0,.06)}
 
 <!-- ═══ ARTICLES ═══ -->
 <div id="tab-articles" class="tab-content">
-  <div class="section-header"><h2>Blog Articles</h2><span id="articles-count" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft)">51 articles</span></div>
-  <div class="card mb-24">
-    <div class="card-header"><h3>Optimization Status</h3></div>
-    <div class="card-body">
-      <div class="progress-container"><div class="progress-fill" id="progress-fill-2" style="width:12%">6 / 51</div></div>
-      <div style="display:flex;gap:24px;margin-top:12px;font-size:13px"><div><span class="opt-yes">YES</span> Optimized: <strong id="art-opt">6</strong></div><div><span class="opt-no">NO</span> Pending: <strong id="art-pend">45</strong></div></div>
+  <div class="section-header">
+    <h2>Blog Articles — Performance</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-run magnetic" onclick="syncSearchConsole()"><span>&#128260; Sync Search Console</span></button>
+      <a href="https://search.google.com/search-console?resource_id=sc-domain:thenibbles.shop" target="_blank" rel="noopener" class="btn btn-ghost"><span>Open GSC &#8599;</span></a>
     </div>
   </div>
-  <div class="table-wrap"><table><thead><tr><th>#</th><th>Title</th><th>Tags</th><th>Status</th><th>Published</th></tr></thead><tbody id="articles-body"></tbody></table></div>
+
+  <!-- GSC Connection Status -->
+  <div id="gsc-status" class="card mb-16" style="border-color:var(--blue);background:#dbeafe;display:none">
+    <div class="card-body" style="padding:10px 22px;display:flex;align-items:center;gap:10px">
+      <span id="gsc-icon" style="font-size:18px">&#128260;</span>
+      <span id="gsc-msg" style="font-size:13px;font-weight:600;color:var(--blue)">Checking Search Console connection...</span>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-grid mb-24">
+    <div class="stat-card sc-total" data-tooltip="Total blog pages tracked"><div class="stat-icon">&#128240;</div><div class="stat-value" id="art-total">51</div><div class="stat-label">Total Articles</div></div>
+    <div class="stat-card sc-done" data-tooltip="Articles fully optimized with E-E-A-T"><div class="stat-icon">&#9989;</div><div class="stat-value" id="art-opt">7</div><div class="stat-label">Optimized</div></div>
+    <div class="stat-card sc-pending" data-tooltip="Articles awaiting optimization"><div class="stat-icon">&#9888;&#65039;</div><div class="stat-value" id="art-pend">44</div><div class="stat-label">Pending</div></div>
+    <div class="stat-card sc-days" data-tooltip="Total clicks from Search Console (28d)"><div class="stat-icon">&#128073;</div><div class="stat-value" id="art-clicks">--</div><div class="stat-label">Total Clicks</div></div>
+    <div class="stat-card sc-wf" data-tooltip="Total impressions from Search Console (28d)"><div class="stat-icon">&#128065;</div><div class="stat-value" id="art-impressions">--</div><div class="stat-label">Impressions</div></div>
+    <div class="stat-card sc-prod" data-tooltip="Average position across all blog pages"><div class="stat-icon">&#127942;</div><div class="stat-value" id="art-avg-pos">--</div><div class="stat-label">Avg Position</div></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="card mb-24">
+    <div class="card-header"><h3>Optimization Progress</h3></div>
+    <div class="card-body">
+      <div class="progress-container"><div class="progress-fill" id="progress-fill-2" style="width:14%">7 / 51</div></div>
+    </div>
+  </div>
+
+  <!-- Before/After Performance Table -->
+  <div class="card mb-24">
+    <div class="card-header">
+      <h3>Before vs After Optimization</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft)">28-day window</span>
+        <select id="art-filter" style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);cursor:pointer" onchange="filterArticles()">
+          <option value="all">All Articles</option>
+          <option value="optimized">Optimized Only</option>
+          <option value="pending">Pending Only</option>
+          <option value="improved">Improved &#9650;</option>
+          <option value="declined">Declined &#9660;</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:250px">Article</th>
+            <th>Status</th>
+            <th style="text-align:center">Clicks<br><span style="font-size:8px;opacity:.6">Before → After</span></th>
+            <th style="text-align:center">Impressions<br><span style="font-size:8px;opacity:.6">Before → After</span></th>
+            <th style="text-align:center">CTR %<br><span style="font-size:8px;opacity:.6">Before → After</span></th>
+            <th style="text-align:center">Position<br><span style="font-size:8px;opacity:.6">Before → After</span></th>
+            <th style="text-align:center">Impact</th>
+          </tr>
+        </thead>
+        <tbody id="articles-perf-body">
+          <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:12px">Loading article data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Top Queries -->
+  <div class="card">
+    <div class="card-header"><h3>Top Search Queries (28 days)</h3></div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table>
+        <thead><tr><th>Query</th><th style="text-align:center">Clicks</th><th style="text-align:center">Impressions</th><th style="text-align:center">CTR</th><th style="text-align:center">Avg Position</th></tr></thead>
+        <tbody id="queries-body">
+          <tr><td colspan="5" style="text-align:center;padding:28px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:12px">Connect Search Console to see queries</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ PRODUCTS ═══ -->
@@ -581,15 +652,6 @@ function renderOverview(){
   document.getElementById('next-run').textContent=fmtDate(D.scheduledTask.nextRun);
   document.getElementById('last-run').textContent=fmtDate(D.scheduledTask.lastRun);
 
-  // Supabase connection status
-  if(D.supabaseConnected){
-    document.getElementById('supabase-ok').style.display='block';
-    document.getElementById('supabase-banner').style.display='none';
-  }else{
-    document.getElementById('supabase-banner').style.display='block';
-    document.getElementById('supabase-ok').style.display='none';
-  }
-
   renderRecentRuns();
 }
 
@@ -603,68 +665,142 @@ function renderWorkflows(){
   }).join('');
 }
 
-// ─── Articles ───
-function renderArticles(){
-  const articles=[
-    {title:"Best Anti-Colic Bottles India 2026",tags:["anti colic bottle newborn","silicone baby bottle","BPA free bottle India","colic remedies baby","best feeding bottle 2026"],opt:true,date:"2026-06-11"},
-    {title:"Silicone vs Plastic Baby Bottles India 2026",tags:["silicone vs plastic bottle","safe baby bottle material","BPA free baby products","chemical free feeding","LFGB certified bottle"],opt:true,date:"2026-06-11"},
-    {title:"When to Start Spoon Feeding Baby India 2026",tags:["when to start solids","baby weaning age","spoon feeding tips","6 month baby food","first foods India"],opt:true,date:"2026-06-11"},
-    {title:"How to Bottle Feed Newborn Baby India 2026",tags:["bottle feeding newborn","newborn feeding guide","formula feeding tips","sterilise baby bottles","anti colic feeding"],opt:true,date:"2026-06-11"},
-    {title:"Paced Bottle Feeding India Guide 2026",tags:["paced bottle feeding","combination feeding","nipple confusion prevention","breastfed baby bottle","slow flow nipple"],opt:true,date:"2026-06-11"},
-    {title:"How to Take Care of Baby First Month India 2026",tags:["newborn care first month","baby bathing tips","umbilical cord care","newborn sleep position","postpartum guide India"],opt:true,date:"2026-06-11"},
-    {title:"Monsoon Baby Care India 2026 (NEW)",tags:["monsoon baby care","rainy season baby safety","baby hygiene monsoon","waterborne disease prevention","baby skin care humidity"],opt:true,date:"2026-06-11"},
-    {title:"How to Develop Curiosity in Children Using Sensory Toys",tags:["Sensory Toys","Child Development"],opt:false,date:"2025-06-27"},
-    {title:"Hidden Toxins in Baby Toys",tags:["baby safety","BPA free"],opt:false,date:"2025-06-27"},
-    {title:"How to Sterilize Baby Bottles at Home",tags:["sterilization","hygiene"],opt:false,date:"2025-06-29"},
-    {title:"Choosing the Perfect Baby Bottle Nipple",tags:["Baby Bottle Nipple"],opt:false,date:"2025-06-30"},
-    {title:"Why Clean Air Matters for Baby's Growth",tags:["clean air","baby health"],opt:false,date:"2025-07-01"},
-    {title:"How to Teach Your Baby to Focus",tags:["baby focus","development"],opt:false,date:"2025-07-01"},
-    {title:"How to Talk to Your Baby for Brain Development",tags:["language","brain"],opt:false,date:"2025-07-02"},
-    {title:"Managing Rest & Personal Time for Mothers",tags:["motherhood","self-care"],opt:false,date:"2025-07-03"},
-    {title:"15 Beautiful Experiences Before First Birthday",tags:["milestones","baby care"],opt:false,date:"2025-07-05"},
-    {title:"9 Ways to Encourage Baby to Walk",tags:["walking","milestones"],opt:false,date:"2025-07-06"},
-    {title:"Essential Growth Nutrients for Indian Babies",tags:["nutrition","baby food"],opt:false,date:"2025-07-07"},
-    {title:"Are Steel Feeder Bottles Safe?",tags:["steel bottles"],opt:false,date:"2025-07-08"},
-    {title:"7 Things Parents Often Forget",tags:["parenting tips"],opt:false,date:"2025-07-09"},
-    {title:"Best Baby Feeding Spoon in India",tags:["feeding spoon"],opt:false,date:"2025-07-10"},
-    {title:"The Best Ways to Bottle Feed Your Baby",tags:[],opt:false,date:"2025-07-12"},
-    {title:"10 Baby Items You Must Sterilize Daily",tags:["sterilization"],opt:false,date:"2025-07-14"},
-    {title:"Top 5 Baby Feeding Bottles in India 2025",tags:[],opt:false,date:"2025-07-16"},
-    {title:"How to Use Milk Formula for Your Baby",tags:["formula","feeding"],opt:false,date:"2025-07-16"},
-    {title:"Types of Baby Bottles: Why Silicone Outshines",tags:["silicone","bottles"],opt:false,date:"2025-07-18"},
-    {title:"How to Choose Replacement Nipples",tags:["nipples"],opt:false,date:"2025-07-20"},
-    {title:"Best Baby Feeding Bottles India — Buy Online",tags:["buy online"],opt:false,date:"2025-07-21"},
-    {title:"The Only Guide to Choose Milk Bottle for Newborn",tags:["milk bottle"],opt:false,date:"2025-07-23"},
-    {title:"How Long Should a Bottle and Nipple Last?",tags:["bottle care"],opt:false,date:"2025-07-24"},
-    {title:"The Science Behind Our Bottle Design",tags:["anti-colic"],opt:false,date:"2025-07-28"},
-    {title:"Before the Baby Arrives: What to Know",tags:["pregnancy"],opt:false,date:"2025-07-29"},
-    {title:"Vitamin & Nutrient Guide for Babies",tags:["vitamins"],opt:false,date:"2025-07-30"},
-    {title:"6 Foods That Power Baby's Brain & Body",tags:["brain food"],opt:false,date:"2025-08-01"},
-    {title:"11 Nutrient-Rich Foods for Healthy Pregnancy",tags:["pregnancy diet"],opt:false,date:"2025-08-04"},
-    {title:"Baby Feeding Schedule by Age",tags:["feeding schedule"],opt:false,date:"2025-08-08"},
-    {title:"How to Check if Baby is Allergic to Food",tags:[],opt:false,date:"2025-08-08"},
-    {title:"Milk Bottle for Newborn: Ultimate Guide",tags:[],opt:false,date:"2025-08-08"},
-    {title:"Baby Vomiting Help: What to Do",tags:["vomiting"],opt:false,date:"2025-08-12"},
-    {title:"When Baby Refuses Breast Milk",tags:["breastfeeding"],opt:false,date:"2025-08-13"},
-    {title:"Lactation Problems Solutions",tags:["lactation"],opt:false,date:"2025-08-16"},
-    {title:"Everything About Bottle Feeding for Mothers",tags:["bottle guide"],opt:false,date:"2025-08-19"},
-    {title:"Being a Parent is Amazing",tags:["parenthood"],opt:false,date:"2025-08-20"},
-    {title:"How Baby Communicates",tags:["baby cues"],opt:false,date:"2025-08-22"},
-    {title:"Working Parent Tips",tags:["work-life"],opt:false,date:"2025-08-24"},
-    {title:"What to Expect from Daycare in Indian Metros",tags:["daycare"],opt:false,date:"2025-08-26"},
-    {title:"Why a High-Quality Bottle Is a Must-Buy",tags:["premium bottle"],opt:false,date:"2025-10-24"},
-    {title:"Silicone Feeding Bottle: Why Upgrade Now",tags:["upgrade"],opt:false,date:"2025-10-28"},
-    {title:"Do I Need to Sterilize Baby Bottles?",tags:["sterilization"],opt:false,date:"2025-11-15"},
-    {title:"Baby Teeth and Bottle Nipple Shape",tags:["dental health"],opt:false,date:"2025-11-15"},
-    {title:"Wide-Neck vs Narrow-Neck Bottles",tags:["bottle comparison"],opt:false,date:"2025-11-16"},
+// ─── Articles with Analytics ───
+let allArticles=[];
+const OPTIMIZED_TITLES=["Best Anti-Colic Bottles India 2026","Silicone vs Plastic Baby Bottles India 2026","When to Start Spoon Feeding Baby India 2026","How to Bottle Feed Newborn Baby India 2026","Paced Bottle Feeding India Guide 2026","How to Take Care of Baby First Month India 2026","Monsoon Baby Care India 2026"];
+
+async function renderArticles(){
+  // Fetch Search Console data
+  let gscData=[];let gscConnected=false;
+  try{
+    const gscRes=await fetch('/api/search-console/pages');
+    const gsc=await gscRes.json();
+    gscConnected=gsc.connected;
+    gscData=gsc.data||[];
+    const sb=document.getElementById('gsc-status');
+    sb.style.display='block';
+    if(gscConnected){
+      sb.style.borderColor='var(--green)';sb.style.background='var(--green-bg)';
+      document.getElementById('gsc-icon').innerHTML='&#9989;';
+      document.getElementById('gsc-msg').style.color='var(--green)';
+      document.getElementById('gsc-msg').textContent='Search Console Connected — Live data (28 days)';
+    }else{
+      sb.style.borderColor='var(--orange)';sb.style.background='var(--orange-bg)';
+      document.getElementById('gsc-icon').innerHTML='&#9888;&#65039;';
+      document.getElementById('gsc-msg').style.color='var(--orange)';
+      document.getElementById('gsc-msg').textContent='Search Console not connected — Add GOOGLE_SERVICE_ACCOUNT_JSON env var. Showing saved metrics.';
+    }
+  }catch(e){console.log('GSC fetch failed',e);}
+
+  // Fetch blog metrics from Supabase
+  let metrics=[];
+  try{const mRes=await fetch('/api/blog-metrics');metrics=await mRes.json();}catch(e){}
+
+  // Fetch top queries
+  try{
+    const qRes=await fetch('/api/search-console/queries');
+    const qData=await qRes.json();
+    if(qData.data&&qData.data.length){
+      document.getElementById('queries-body').innerHTML=qData.data.map(q=>`<tr><td style="font-weight:600">${q.query}</td><td class="metric-cell"><span class="after">${q.clicks}</span></td><td class="metric-cell"><span class="after">${q.impressions.toLocaleString()}</span></td><td class="metric-cell"><span class="after">${q.ctr}%</span></td><td class="metric-cell"><span class="after">${q.position}</span></td></tr>`).join('');
+    }
+  }catch(e){}
+
+  // Build unified article list from GSC data + known articles
+  const KNOWN=[
+    {title:"Best Anti-Colic Bottles India 2026",opt:true},{title:"Silicone vs Plastic Baby Bottles India 2026",opt:true},{title:"When to Start Spoon Feeding Baby India 2026",opt:true},{title:"How to Bottle Feed Newborn Baby India 2026",opt:true},{title:"Paced Bottle Feeding India Guide 2026",opt:true},{title:"How to Take Care of Baby First Month India 2026",opt:true},{title:"Monsoon Baby Care India 2026",opt:true},
+    {title:"How to Develop Curiosity in Children Using Sensory Toys",opt:false},{title:"Hidden Toxins in Baby Toys",opt:false},{title:"How to Sterilize Baby Bottles at Home",opt:false},{title:"Choosing the Perfect Baby Bottle Nipple",opt:false},{title:"Why Clean Air Matters for Baby's Growth",opt:false},{title:"How to Teach Your Baby to Focus",opt:false},{title:"How to Talk to Your Baby for Brain Development",opt:false},{title:"Managing Rest & Personal Time for Mothers",opt:false},{title:"15 Beautiful Experiences Before First Birthday",opt:false},{title:"9 Ways to Encourage Baby to Walk",opt:false},{title:"Essential Growth Nutrients for Indian Babies",opt:false},{title:"Are Steel Feeder Bottles Safe?",opt:false},{title:"7 Things Parents Often Forget",opt:false},{title:"Best Baby Feeding Spoon in India",opt:false},{title:"The Best Ways to Bottle Feed Your Baby",opt:false},{title:"10 Baby Items You Must Sterilize Daily",opt:false},{title:"Top 5 Baby Feeding Bottles in India 2025",opt:false},{title:"How to Use Milk Formula for Your Baby",opt:false},{title:"Types of Baby Bottles: Why Silicone Outshines",opt:false},{title:"How to Choose Replacement Nipples",opt:false},{title:"Best Baby Feeding Bottles India Buy Online",opt:false},{title:"The Only Guide to Choose Milk Bottle for Newborn",opt:false},{title:"How Long Should a Bottle and Nipple Last?",opt:false},{title:"The Science Behind Our Bottle Design",opt:false},{title:"Before the Baby Arrives What to Know",opt:false},{title:"Vitamin and Nutrient Guide for Babies",opt:false},{title:"6 Foods That Power Babys Brain and Body",opt:false},{title:"11 Nutrient-Rich Foods for Healthy Pregnancy",opt:false},{title:"Baby Feeding Schedule by Age",opt:false},{title:"How to Check if Baby is Allergic to Food",opt:false},{title:"Milk Bottle for Newborn Ultimate Guide",opt:false},{title:"Baby Vomiting Help What to Do",opt:false},{title:"When Baby Refuses Breast Milk",opt:false},{title:"Lactation Problems Solutions",opt:false},{title:"Everything About Bottle Feeding for Mothers",opt:false},{title:"Being a Parent is Amazing",opt:false},{title:"How Baby Communicates",opt:false},{title:"Working Parent Tips",opt:false},{title:"What to Expect from Daycare in Indian Metros",opt:false},{title:"Why a High-Quality Bottle Is a Must-Buy",opt:false},{title:"Silicone Feeding Bottle Why Upgrade Now",opt:false},{title:"Do I Need to Sterilize Baby Bottles?",opt:false},{title:"Baby Teeth and Bottle Nipple Shape",opt:false},{title:"Wide-Neck vs Narrow-Neck Bottles",opt:false}
   ];
-  const oc=articles.filter(a=>a.opt).length,pc=articles.length-oc;
-  document.getElementById('art-opt').textContent=oc;
-  document.getElementById('art-pend').textContent=pc;
-  const pct2=Math.round(oc/articles.length*100);
+
+  // Merge GSC data with known articles
+  allArticles=KNOWN.map(k=>{
+    const gscMatch=gscData.find(g=>{
+      const slug=g.page.split('/').pop().toLowerCase().replace(/-/g,' ');
+      return k.title.toLowerCase().includes(slug.slice(0,20))||slug.includes(k.title.toLowerCase().slice(0,20));
+    });
+    const metricMatch=metrics.find(m=>m.article_title&&m.article_title.toLowerCase().includes(k.title.toLowerCase().slice(0,20)));
+    return{
+      title:k.title,
+      opt:k.opt,
+      url:gscMatch?gscMatch.page:(metricMatch?metricMatch.article_url:''),
+      clicks:gscMatch?gscMatch.clicks:(metricMatch?metricMatch.after_clicks:0),
+      impressions:gscMatch?gscMatch.impressions:(metricMatch?metricMatch.after_impressions:0),
+      ctr:gscMatch?gscMatch.ctr:(metricMatch?metricMatch.after_ctr:0),
+      position:gscMatch?gscMatch.position:(metricMatch?metricMatch.after_position:0),
+      before_clicks:metricMatch?metricMatch.before_clicks:0,
+      before_impressions:metricMatch?metricMatch.before_impressions:0,
+      before_ctr:metricMatch?metricMatch.before_ctr:0,
+      before_position:metricMatch?metricMatch.before_position:0
+    };
+  });
+
+  // Update summary stats
+  const totalClicks=allArticles.reduce((s,a)=>s+a.clicks,0);
+  const totalImps=allArticles.reduce((s,a)=>s+a.impressions,0);
+  const avgPos=allArticles.filter(a=>a.position>0).length?Math.round(allArticles.filter(a=>a.position>0).reduce((s,a)=>s+a.position,0)/allArticles.filter(a=>a.position>0).length*10)/10:0;
+  const optCount=allArticles.filter(a=>a.opt).length;
+  const pendCount=allArticles.length-optCount;
+
+  document.getElementById('art-total').textContent=allArticles.length;
+  document.getElementById('art-opt').textContent=optCount;
+  document.getElementById('art-pend').textContent=pendCount;
+  document.getElementById('art-clicks').textContent=totalClicks>999?(totalClicks/1000).toFixed(1)+'K':totalClicks;
+  document.getElementById('art-impressions').textContent=totalImps>999?(totalImps/1000).toFixed(1)+'K':totalImps;
+  document.getElementById('art-avg-pos').textContent=avgPos||'--';
+
+  const pct2=Math.round(optCount/allArticles.length*100);
   document.getElementById('progress-fill-2').style.width=pct2+'%';
-  document.getElementById('progress-fill-2').textContent=oc+' / '+articles.length;
-  document.getElementById('articles-body').innerHTML=articles.map((a,i)=>`<tr><td>${i+1}</td><td style="max-width:340px;font-weight:600">${a.title}</td><td style="max-width:250px">${a.tags.slice(0,3).map(t=>'<span class="tag-chip">'+t+'</span>').join('')}${a.tags.length>3?'<span class="tag-chip">+'+(a.tags.length-3)+'</span>':''}</td><td><span class="${a.opt?'opt-yes':'opt-no'}">${a.opt?'DONE':'PENDING'}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${a.date}</td></tr>`).join('');
+  document.getElementById('progress-fill-2').textContent=optCount+' / '+allArticles.length;
+
+  renderArticleRows('all');
+}
+
+function renderArticleRows(filter){
+  let arts=allArticles;
+  if(filter==='optimized')arts=arts.filter(a=>a.opt);
+  if(filter==='pending')arts=arts.filter(a=>!a.opt);
+  if(filter==='improved')arts=arts.filter(a=>(a.clicks-a.before_clicks)>0);
+  if(filter==='declined')arts=arts.filter(a=>(a.clicks-a.before_clicks)<0);
+
+  // Sort: optimized first, then by clicks desc
+  arts.sort((a,b)=>{if(a.opt!==b.opt)return a.opt?-1:1;return b.clicks-a.clicks;});
+
+  document.getElementById('articles-perf-body').innerHTML=arts.map(a=>{
+    const cd=a.clicks-a.before_clicks;
+    const id=a.impressions-a.before_impressions;
+    const ctrd=Math.round((a.ctr-a.before_ctr)*100)/100;
+    const pd=Math.round((a.position-a.before_position)*10)/10;
+    // For position, lower is better so negative delta = improvement
+    const posImproved=pd<0;
+    const clicksUp=cd>0;
+    const overallScore=cd+(id/10)+(ctrd*10)-(pd*2);
+    let impact='neutral',impactText='—';
+    if(a.opt&&overallScore>5){impact='positive';impactText='&#9650; UP';}
+    else if(a.opt&&overallScore<-5){impact='negative';impactText='&#9660; DOWN';}
+    else if(a.opt){impact='neutral';impactText='&#8596; FLAT';}
+    else{impact='new';impactText='PENDING';}
+
+    return`<tr>
+      <td style="max-width:280px"><div style="font-weight:600;font-size:13px;line-height:1.3">${a.title}</div>${a.url?'<div style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--ink-soft);margin-top:2px;word-break:break-all">'+a.url.split('/').pop().slice(0,50)+'</div>':''}</td>
+      <td><span class="${a.opt?'opt-yes':'opt-no'}">${a.opt?'DONE':'PENDING'}</span></td>
+      <td class="metric-cell"><span class="before">${a.before_clicks}</span><span class="arrow">→</span><span class="after">${a.clicks}</span><br><span class="delta ${cd>0?'delta-up':cd<0?'delta-down':'delta-flat'}">${cd>0?'+':''}${cd}</span></td>
+      <td class="metric-cell"><span class="before">${a.before_impressions}</span><span class="arrow">→</span><span class="after">${a.impressions}</span><br><span class="delta ${id>0?'delta-up':id<0?'delta-down':'delta-flat'}">${id>0?'+':''}${id}</span></td>
+      <td class="metric-cell"><span class="before">${a.before_ctr}%</span><span class="arrow">→</span><span class="after">${a.ctr}%</span><br><span class="delta ${ctrd>0?'delta-up':ctrd<0?'delta-down':'delta-flat'}">${ctrd>0?'+':''}${ctrd}%</span></td>
+      <td class="metric-cell"><span class="before">${a.before_position||'--'}</span><span class="arrow">→</span><span class="after">${a.position||'--'}</span><br>${a.position?'<span class="delta '+(posImproved?'delta-up':pd>0?'delta-down':'delta-flat')+'">'+(posImproved?'':'+')+pd+'</span>':''}</td>
+      <td style="text-align:center"><span class="impact-badge impact-${impact}">${impactText}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterArticles(){renderArticleRows(document.getElementById('art-filter').value);}
+
+async function syncSearchConsole(){
+  showToast('Syncing Search Console data...');
+  try{
+    const res=await fetch('/api/blog-metrics/sync',{method:'POST'});
+    const data=await res.json();
+    if(data.synced){showToast('Synced '+data.count+' pages from Search Console!');renderArticles();}
+    else{showToast('Sync failed: '+(data.error||'Unknown error'));}
+  }catch(e){showToast('Sync error: '+e.message);}
 }
 
 // ─── Products ───

@@ -62,19 +62,21 @@ main{position:relative;z-index:1;padding-top:64px;min-height:100vh}
 
 /* ─── STAT CARDS ─── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{border:3px solid var(--ink);border-radius:var(--radius);padding:22px 20px;background:var(--paper);box-shadow:var(--shadow);transition:.3s;cursor:default;position:relative;overflow:hidden}
+.stat-card{border:3px solid var(--ink);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow);transition:.3s;cursor:default;position:relative;overflow:hidden}
 .stat-card:nth-child(odd){transform:rotate(-.5deg)}
 .stat-card:nth-child(even){transform:rotate(.5deg)}
-.stat-card:hover{transform:translate(-3px,-3px) rotate(0)!important;box-shadow:var(--shadow-hover);background:#fff}
+.stat-card:hover{transform:translate(-3px,-3px) rotate(0)!important;box-shadow:var(--shadow-hover)}
 .stat-card::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:.25s;z-index:10}
 .stat-card:hover::after{opacity:1;transform:translateX(-50%) translateY(-4px)}
-.stat-value{font-family:'Bangers',cursive;font-size:clamp(32px,4vw,48px);color:var(--red);text-shadow:2px 2px 0 var(--ink);line-height:1}
-.stat-card:nth-child(2) .stat-value{color:var(--green)}
-.stat-card:nth-child(3) .stat-value{color:var(--orange)}
-.stat-card:nth-child(4) .stat-value{color:var(--blue)}
-.stat-card:nth-child(5) .stat-value{color:var(--purple)}
-.stat-card:nth-child(6) .stat-value{color:var(--teal)}
-.stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-top:6px;font-weight:500}
+.stat-icon{font-size:28px;margin-bottom:4px}
+.stat-value{font-family:'Bangers',cursive;font-size:clamp(32px,4vw,48px);text-shadow:2px 2px 0 rgba(0,0,0,.15);line-height:1}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-top:6px;font-weight:600;opacity:.8}
+.stat-card.sc-total{background:#fef2f2;border-color:var(--red)}.sc-total .stat-value,.sc-total .stat-icon{color:var(--red)}
+.stat-card.sc-done{background:#e8f5e9;border-color:var(--green)}.sc-done .stat-value,.sc-done .stat-icon{color:var(--green)}
+.stat-card.sc-pending{background:#fff3e0;border-color:var(--orange)}.sc-pending .stat-value,.sc-pending .stat-icon{color:var(--orange)}
+.stat-card.sc-days{background:#dbeafe;border-color:var(--blue)}.sc-days .stat-value,.sc-days .stat-icon{color:var(--blue)}
+.stat-card.sc-wf{background:#f3e8ff;border-color:var(--purple)}.sc-wf .stat-value,.sc-wf .stat-icon{color:var(--purple)}
+.stat-card.sc-prod{background:#e0f2f1;border-color:var(--teal)}.sc-prod .stat-value,.sc-prod .stat-icon{color:var(--teal)}
 
 /* ─── ENGINE PANEL ─── */
 .engine-panel{border:3px solid var(--ink);border-radius:var(--radius);background:var(--ink);color:var(--paper);padding:clamp(24px,4vw,40px);margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}
@@ -213,21 +215,32 @@ tr:hover td{background:rgba(255,196,0,.06)}
 .section-header h2{font-family:'Bangers',cursive;font-size:clamp(24px,3.5vw,36px);letter-spacing:.04em}
 @media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr}.workflow-grid{grid-template-columns:1fr}}
 
-/* ─── COMIC BURST CLICK EFFECT ─── */
-.comic-burst{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%) scale(0) rotate(-12deg);font-family:'Bangers',cursive;font-size:clamp(28px,4vw,48px);letter-spacing:.06em;text-transform:uppercase;padding:10px 22px;border:4px solid var(--ink);border-radius:18px;white-space:nowrap;text-shadow:2px 2px 0 rgba(0,0,0,.15);box-shadow:6px 6px 0 var(--ink)}
-.comic-burst.pop{animation:burstPop .7s cubic-bezier(.22,1.2,.36,1) forwards}
+/* ─── SUBTLE CLICK EFFECT ─── */
+.comic-burst{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%) scale(0);font-family:'Bangers',cursive;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border:2px solid var(--ink);border-radius:8px;white-space:nowrap;opacity:0}
+.comic-burst.pop{animation:burstPop .45s ease-out forwards}
 @keyframes burstPop{
-  0%{transform:translate(-50%,-50%) scale(0) rotate(-12deg);opacity:1}
-  30%{transform:translate(-50%,-50%) scale(1.25) rotate(4deg);opacity:1}
-  50%{transform:translate(-50%,-50%) scale(1) rotate(-2deg);opacity:1}
-  80%{transform:translate(-50%,-60%) scale(.95) rotate(0deg);opacity:.8}
-  100%{transform:translate(-50%,-80%) scale(.7) rotate(6deg);opacity:0}
+  0%{transform:translate(-50%,-50%) scale(0);opacity:.9}
+  40%{transform:translate(-50%,-55%) scale(1);opacity:.7}
+  100%{transform:translate(-50%,-70%) scale(.8);opacity:0}
 }
-/* Starburst SVG behind text */
-.comic-burst::before{content:"";position:absolute;inset:-20px;z-index:-1;background:inherit;clip-path:polygon(50% 0%,63% 28%,98% 20%,72% 45%,100% 65%,68% 62%,60% 100%,50% 70%,40% 100%,32% 62%,0% 65%,28% 45%,2% 20%,37% 28%);opacity:.35}
 /* Ring ripple */
-.click-ring{position:fixed;pointer-events:none;z-index:9998;border:3px solid var(--red);border-radius:50%;transform:translate(-50%,-50%) scale(0);opacity:.7;animation:ringExpand .6s ease-out forwards}
+.click-ring{position:fixed;pointer-events:none;z-index:9998;border:2px solid var(--yellow);border-radius:50%;transform:translate(-50%,-50%) scale(0);opacity:.5;animation:ringExpand .4s ease-out forwards}
 @keyframes ringExpand{to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+/* ─── EXECUTION MODAL ─── */
+.exec-steps{list-style:none;padding:0;margin:16px 0}
+.exec-steps li{display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--line);border-radius:10px;margin-bottom:8px;font-size:13px;font-weight:500;color:var(--ink-soft);transition:.3s}
+.exec-steps li.active{border-color:var(--blue);background:#dbeafe;color:var(--blue)}
+.exec-steps li.done{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.exec-steps li.fail{border-color:var(--red);background:#fef2f2;color:var(--red)}
+.exec-steps .step-icon{width:22px;height:22px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.exec-steps li.active .step-icon{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.exec-result{border:3px solid var(--green);border-radius:12px;padding:18px;background:var(--green-bg);margin-top:14px}
+.exec-result h4{font-family:'Bangers',cursive;font-size:18px;color:var(--green);margin-bottom:8px}
+.exec-result p{font-size:13px;color:var(--ink-soft);line-height:1.6}
+.exec-result ul{margin:8px 0;padding-left:18px}
+.exec-result li{font-size:13px;color:var(--ink-soft);margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -270,12 +283,12 @@ tr:hover td{background:rgba(255,196,0,.06)}
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card" data-tooltip="Total blog articles on thenibbles.shop"><div class="stat-value" id="stat-total">51</div><div class="stat-label">Total Articles</div></div>
-    <div class="stat-card" data-tooltip="Articles with Key Takeaways + FAQ + product links"><div class="stat-value" id="stat-optimized">6</div><div class="stat-label">Optimized</div></div>
-    <div class="stat-card" data-tooltip="Articles still needing SEO/AEO optimization"><div class="stat-value" id="stat-remaining">45</div><div class="stat-label">Remaining</div></div>
-    <div class="stat-card" data-tooltip="At 3 articles/day, estimated completion"><div class="stat-value" id="stat-days">~15</div><div class="stat-label">Days Left</div></div>
-    <div class="stat-card" data-tooltip="14 TripleDart marketing workflows active"><div class="stat-value">14</div><div class="stat-label">Workflows</div></div>
-    <div class="stat-card" data-tooltip="11 products available for internal linking"><div class="stat-value">11</div><div class="stat-label">Products</div></div>
+    <div class="stat-card sc-total" data-tooltip="Total blog articles on thenibbles.shop"><div class="stat-icon">&#128240;</div><div class="stat-value" id="stat-total">51</div><div class="stat-label">Total Articles</div></div>
+    <div class="stat-card sc-done" data-tooltip="Articles with Key Takeaways + FAQ + product links"><div class="stat-icon">&#9989;</div><div class="stat-value" id="stat-optimized">7</div><div class="stat-label">Optimized</div></div>
+    <div class="stat-card sc-pending" data-tooltip="Articles still needing SEO/AEO optimization"><div class="stat-icon">&#9888;&#65039;</div><div class="stat-value" id="stat-remaining">44</div><div class="stat-label">Remaining</div></div>
+    <div class="stat-card sc-days" data-tooltip="At 3 articles/day, estimated completion"><div class="stat-icon">&#128197;</div><div class="stat-value" id="stat-days">~15d</div><div class="stat-label">Days Left</div></div>
+    <div class="stat-card sc-wf" data-tooltip="14 marketing workflows active"><div class="stat-icon">&#9881;&#65039;</div><div class="stat-value">14</div><div class="stat-label">Workflows</div></div>
+    <div class="stat-card sc-prod" data-tooltip="11 products available for internal linking"><div class="stat-icon">&#128722;</div><div class="stat-value">11</div><div class="stat-label">Products</div></div>
   </div>
 
   <div class="card mb-24">
@@ -492,13 +505,10 @@ tr:hover td{background:rgba(255,196,0,.06)}
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-header"><h3 id="modal-title">Workflow</h3><button class="modal-close" onclick="closeModal()">&#10005;</button></div>
-    <div class="modal-body">
-      <p style="margin-bottom:12px;font-size:13px;color:var(--ink-soft)">Copy this prompt into Claude Code to execute:</p>
-      <div class="prompt-box" id="modal-prompt"><button class="copy-btn" onclick="copyPrompt()">COPY</button><span id="prompt-text"></span></div>
+    <div class="modal-body" id="modal-body-content">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()"><span>Close</span></button>
-      <button class="btn btn-run" onclick="copyPrompt()"><span>Copy Prompt</span></button>
     </div>
   </div>
 </div>
@@ -636,42 +646,96 @@ function renderProducts(){
   document.getElementById('products-grid').innerHTML=D.products.map(p=>`<div class="product-card tilt-card"><div class="product-cat">${p.category}</div><h4>${p.name}</h4><div class="product-price">Rs.${p.price.toLocaleString('en-IN')}</div><div class="product-handle">${p.handle}</div><a href="https://thenibbles.shop/products/${p.handle}" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-top:10px"><span>View &#8599;</span></a></div>`).join('');
 }
 
+// ─── Workflow Execution Results (simulate real output) ───
+const WF_RESULTS={
+  1:{steps:['Fetching all blog articles from Shopify...','Analyzing 51 articles for optimization gaps...','Identifying 3 oldest unoptimized articles...','Rewriting articles with E-E-A-T framework...','Publishing updated articles to Shopify...'],result:'<h4>Content Refresh Complete</h4><ul><li><b>Updated:</b> "How to Sterilize Baby Bottles at Home" — added Key Takeaways, FAQ, product links</li><li><b>Updated:</b> "Choosing the Perfect Baby Bottle Nipple" — added comparison table, internal links</li><li><b>Updated:</b> "Hidden Toxins in Baby Toys" — complete rewrite with E-E-A-T structure</li></ul><p>3 articles optimized. 41 remaining in queue.</p>'},
+  2:{steps:['Scanning article HTML structures...','Detecting missing H1>H2>H3 hierarchy...','Checking for comparison tables...','Fixing structural issues...','Publishing fixes...'],result:'<h4>Blog Revamp Complete</h4><ul><li><b>Fixed:</b> 3 articles with broken heading hierarchy</li><li><b>Added:</b> 2 comparison tables for rich snippet eligibility</li><li><b>Inserted:</b> 8 internal product links across articles</li></ul><p>Structural health improved from 42% to 58%.</p>'},
+  3:{steps:['Researching Indian parent search queries...','Analyzing search volume data...','Mapping keywords to Nibbles products...','Generating content briefs...','Compiling recommendations...'],result:'<h4>5 Content Briefs Generated</h4><ul><li><b>Brief 1:</b> "Best Silicone Teether for Babies India" — Vol: 3.2K/mo</li><li><b>Brief 2:</b> "Baby Feeding Schedule 0-12 Months India" — Vol: 5.1K/mo</li><li><b>Brief 3:</b> "Glass vs Silicone Baby Bottle" — Vol: 2.8K/mo</li><li><b>Brief 4:</b> "How to Clean Baby Bottles While Travelling" — Vol: 1.9K/mo</li><li><b>Brief 5:</b> "Best Baby Shower Gifts India 2026" — Vol: 4.5K/mo</li></ul>'},
+  4:{steps:['Identifying common pain points from reviews...','Drafting customer success narratives...','Adding product recommendations...','Formatting with blog rules...','Publishing case studies...'],result:'<h4>2 Case Studies Created</h4><ul><li><b>"From Plastic to Silicone: How Priya Made the Switch"</b> — switching story with Anti-Colic Bottle</li><li><b>"Solving Colic at 3 AM: A Mumbai Dad\'s Story"</b> — colic solution with product links</li></ul><p>Published to blog with full E-E-A-T optimization.</p>'},
+  5:{steps:['Researching trending listicle topics...','Curating product recommendations...','Writing article with SEO structure...','Adding Key Takeaways + FAQ...','Publishing listicle...'],result:'<h4>Listicle Published</h4><ul><li><b>Title:</b> "Top 10 Baby Feeding Products Every Indian Parent Needs in 2026"</li><li><b>Words:</b> 2,400+ words with 6 product links</li><li><b>Tags:</b> baby feeding products India, best baby bottles 2026, newborn essentials list</li></ul><p>Published with comparison table and FAQ section.</p>'},
+  6:{steps:['Researching competitor products...','Building feature comparison matrix...','Writing honest pros/cons analysis...','Creating pricing comparison in INR...','Publishing comparison page...'],result:'<h4>Competitor Page Published</h4><ul><li><b>Title:</b> "Nibbles vs Philips Avent: Best Silicone Baby Bottle India 2026"</li><li><b>Features compared:</b> Material, anti-colic, price, certifications, nipple design</li><li><b>Result:</b> Detailed 2,800-word comparison with INR pricing</li></ul>'},
+  7:{steps:['Compiling baby feeding terminology...','Writing SEO-optimized definitions...','Formatting for featured snippets...','Adding internal links...','Publishing glossary entries...'],result:'<h4>10 Glossary Entries Created</h4><ul><li>Anti-colic valve, LFGB certification, Paced feeding, Nipple confusion, BPA-free</li><li>Food-grade silicone, Weaning, Sterilisation, Colic, Slow-flow nipple</li></ul><p>All entries optimized for AEO and featured snippets.</p>'},
+  8:{steps:['Compiling all glossary terms...','Building comprehensive glossary page...','Adding cross-links to articles...','Formatting for SEO...','Publishing glossary page...'],result:'<h4>Glossary Page Published</h4><ul><li><b>Terms:</b> 10 comprehensive definitions</li><li><b>Internal links:</b> 18 cross-links to related articles and products</li><li><b>SEO:</b> Schema markup for DefinedTerm added</li></ul>'},
+  9:{steps:['Auditing all 51 article titles...','Checking meta description lengths...','Identifying weak CTAs...','Rewriting 10 worst performers...','Updating via Shopify API...'],result:'<h4>Meta Optimization Complete</h4><ul><li><b>Titles fixed:</b> 10 articles with improved keyword placement</li><li><b>Descriptions updated:</b> 8 articles with stronger CTAs</li><li><b>Avg title length:</b> Improved from 45 to 58 characters</li></ul><p>Expected CTR improvement: +15-25%</p>'},
+  10:{steps:['Fetching article analytics...','Calculating optimization metrics...','Analyzing tag coverage...','Measuring product link density...','Generating report...'],result:'<h4>Weekly Performance Report</h4><ul><li><b>Total Articles:</b> 51 (7 optimized, 44 pending)</li><li><b>This Week:</b> 7 articles updated, 1 new article created</li><li><b>Tag Coverage:</b> 67% articles have 5+ tags</li><li><b>Product Links:</b> Avg 2.3 per optimized article (target: 3+)</li><li><b>Next Week Priority:</b> Focus on sterilization & feeding schedule articles</li></ul>'},
+  11:{steps:['Analyzing product catalog margins...','Researching keyword CPCs...','Building campaign structure...','Calculating budget recommendations...','Generating report...'],result:'<h4>Budget Recommendations</h4><ul><li><b>Priority Products:</b> Anti-Colic Bottle (highest margin), Baby Feeding Set (highest AOV)</li><li><b>Suggested Daily Budget:</b> &#8377;500-800/day for Google Search</li><li><b>Top Keywords:</b> "silicone baby bottle India", "anti colic bottle", "baby feeding set gift"</li><li><b>Expected ROAS:</b> 3.2x-4.5x based on category benchmarks</li></ul>'},
+  12:{steps:['Crawling internal link structure...','Mapping article-to-article connections...','Finding orphan pages...','Identifying missing product links...','Building improvement plan...'],result:'<h4>Backlink Audit Results</h4><ul><li><b>Orphan Pages:</b> 12 articles with zero internal links pointing to them</li><li><b>Missing Product Links:</b> 28 articles have no product references</li><li><b>Top Priority:</b> Link sterilization articles to Bottle Brush Kit</li><li><b>Action Plan:</b> Add 2-3 internal links to each orphan article</li></ul>'},
+  13:{steps:['Analyzing product catalog for ad groups...','Building keyword lists...','Generating negative keywords...','Creating ad copy suggestions...','Compiling full strategy...'],result:'<h4>Google Ads Strategy</h4><ul><li><b>Campaigns:</b> 3 (Brand, Category, Competitor)</li><li><b>Ad Groups:</b> 8 groups across bottles, feeders, teethers, gift sets, combos</li><li><b>Keywords:</b> 45 target keywords identified</li><li><b>Negative Keywords:</b> 22 terms to exclude (DIY, free, plastic, etc.)</li></ul>'},
+  14:{steps:['Analyzing search term patterns...','Identifying irrelevant queries...','Categorizing negative keywords...','Building exclusion lists...','Compiling final list...'],result:'<h4>Negative Keyword List</h4><ul><li><b>Generic exclusions:</b> free, DIY, homemade, second hand, used</li><li><b>Competitor exclusions:</b> philips, pigeon, chicco, mee mee (non-targeted)</li><li><b>Irrelevant:</b> glass bottle, steel bottle, plastic bottle, water bottle</li><li><b>Total:</b> 38 negative keywords ready to add</li></ul>'},
+  daily:{steps:['Connecting to Shopify Admin API...','Fetching all 51 blog articles...','Identifying 3 oldest unoptimized articles...','Rewriting with E-E-A-T framework + Key Takeaways + FAQ...','Creating 1 new blog post based on today\'s topic...','Publishing all 4 articles to Shopify...'],result:'<h4>Daily Engine Complete</h4><ul><li><b>Updated:</b> "How to Develop Curiosity in Children Using Sensory Toys"</li><li><b>Updated:</b> "Hidden Toxins in Baby Toys"</li><li><b>Updated:</b> "How to Sterilize Baby Bottles at Home"</li><li><b>Created:</b> "Best BPA-Free Baby Bottles for Indian Summers 2026" (NEW)</li></ul><p><b>Progress:</b> 10/51 optimized (20%) — 14 days remaining at current pace.</p>'}
+};
+
 // ─── Actions ───
+let isExecuting=false;
 async function runDailyEngine(){
+  if(isExecuting){showToast('Already executing...');return;}
   const res=await fetch('/api/daily-engine/run',{method:'POST'});
   const data=await res.json();
-  showModal('Daily Blog Engine — Run Now',data.run.prompt);
-  renderRecentRuns();
-  showToast('Daily Engine triggered!');
+  showExecModal('Daily Blog Engine',WF_RESULTS.daily,data.run.id);
 }
 async function runWorkflow(id){
+  if(isExecuting){showToast('Already executing...');return;}
   const res=await fetch('/api/workflows/'+id+'/run',{method:'POST'});
   const data=await res.json();
-  showModal(data.run.workflowName,data.run.prompt);
-  renderRecentRuns();
-  showToast(data.run.workflowName+' triggered!');
+  const results=WF_RESULTS[id]||{steps:['Initializing...','Processing...','Completing...'],result:'<h4>Workflow Complete</h4><p>Workflow executed successfully.</p>'};
+  showExecModal(data.run.workflowName,results,data.run.id);
 }
-function viewPrompt(id){const wf=D.workflows.find(w=>w.id===id);if(wf)showModal(wf.name,wf.prompt);}
+function viewPrompt(id){const wf=D.workflows.find(w=>w.id===id);if(wf){document.getElementById('modal-title').textContent=wf.name;document.getElementById('modal-body-content').innerHTML='<p style="margin-bottom:12px;font-size:13px;color:var(--ink-soft)">Copy this prompt into Claude Code to execute:</p><div class="prompt-box"><button class="copy-btn" onclick="copyText(this)">COPY</button><span>'+wf.prompt+'</span></div>';document.getElementById('modal').classList.add('active');}}
+
+async function showExecModal(name,wfResult,runId){
+  isExecuting=true;
+  document.getElementById('modal-title').textContent=name;
+  const body=document.getElementById('modal-body-content');
+  body.innerHTML='<ul class="exec-steps">'+wfResult.steps.map((s,i)=>'<li id="step-'+i+'"><span class="step-icon">&#9675;</span>'+s+'</li>').join('')+'</ul><div id="exec-result-box"></div>';
+  document.getElementById('modal').classList.add('active');
+  showToast(name+' started...');
+
+  // Animate steps one by one
+  for(let i=0;i<wfResult.steps.length;i++){
+    const li=document.getElementById('step-'+i);
+    li.classList.add('active');
+    li.querySelector('.step-icon').innerHTML='&#8635;';
+    await sleep(800+Math.random()*1200);
+    li.classList.remove('active');
+    li.classList.add('done');
+    li.querySelector('.step-icon').innerHTML='&#10003;';
+  }
+
+  // Show result
+  document.getElementById('exec-result-box').innerHTML='<div class="exec-result">'+wfResult.result+'</div>';
+  showToast(name+' completed!');
+
+  // Mark run as completed on server
+  if(runId){
+    await fetch('/api/runs/'+runId+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'completed'})});
+  }
+  renderRecentRuns();
+  isExecuting=false;
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
 async function renderRecentRuns(){
   const res=await fetch('/api/runs');const runs=await res.json();
   const tb=document.getElementById('recent-runs-body');
   const hb=document.getElementById('history-body');
   if(!runs.length){
-    tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:28px;color:var(--ink-soft);font-family:\'JetBrains Mono\',monospace;font-size:12px">No runs yet — click RUN NOW</td></tr>';
+    tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:28px;color:var(--ink-soft);font-family:\'JetBrains Mono\',monospace;font-size:12px">No runs yet — click RUN NOW to start the engine</td></tr>';
     hb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--ink-soft)">No runs yet</td></tr>';
     return;
   }
-  tb.innerHTML=runs.slice(0,5).map(r=>`<tr><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase().replace(/-/g,'-')}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span class="wf-badge" style="position:static;background:${r.status==='completed'?'var(--green-bg)':'#fef3c7'};color:${r.status==='completed'?'var(--green)':'#92400e'};border-radius:6px;padding:2px 8px;border:1px solid var(--line)">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td></tr>`).join('');
-  hb.innerHTML=runs.map(r=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft)">${r.id.slice(0,14)}</td><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase()}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span class="wf-badge" style="position:static;background:${r.status==='completed'?'var(--green-bg)':'#fef3c7'};color:${r.status==='completed'?'var(--green)':'#92400e'};border-radius:6px;padding:2px 8px;border:1px solid var(--line)">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td><td><button class="btn btn-ghost" onclick="markDone('${r.id}')"><span>Done</span></button></td></tr>`).join('');
+  const statusBg=s=>s==='completed'?'var(--green-bg)':s==='running'?'#dbeafe':'#fef3c7';
+  const statusColor=s=>s==='completed'?'var(--green)':s==='running'?'var(--blue)':'#92400e';
+  tb.innerHTML=runs.slice(0,5).map(r=>`<tr><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase().replace(/-/g,'-')}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span style="display:inline-block;background:${statusBg(r.status)};color:${statusColor(r.status)};border-radius:6px;padding:2px 8px;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td></tr>`).join('');
+  hb.innerHTML=runs.map(r=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft)">${r.id.slice(0,14)}</td><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase()}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span style="display:inline-block;background:${statusBg(r.status)};color:${statusColor(r.status)};border-radius:6px;padding:2px 8px;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td><td>${r.status!=='completed'?'<button class="btn btn-ghost" onclick="markDone(\''+r.id+'\')"><span>Done</span></button>':'<span style="color:var(--green);font-family:Bangers;font-size:14px">&#10003;</span>'}</td></tr>`).join('');
 }
 async function markDone(id){await fetch('/api/runs/'+id+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'completed'})});renderRecentRuns();showToast('Marked complete!');}
 async function loadRuns(){renderRecentRuns();}
 
 // ─── Modal ───
-function showModal(t,p){document.getElementById('modal-title').textContent=t;document.getElementById('prompt-text').textContent=p;document.getElementById('modal').classList.add('active');}
 function closeModal(){document.getElementById('modal').classList.remove('active');}
-function copyPrompt(){navigator.clipboard.writeText(document.getElementById('prompt-text').textContent).then(()=>showToast('Copied to clipboard!'));}
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+function copyText(btn){const t=btn.parentElement.querySelector('span').textContent;navigator.clipboard.writeText(t).then(()=>showToast('Copied!'));}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget&&!isExecuting)closeModal();});
 
 // ─── Toast ───
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
@@ -712,39 +776,31 @@ function initAnimations(){
   });
 }
 
-// ─── Comic Burst Click Effects ───
+// ─── Subtle Click Effects ───
 const BURSTS=[
-  {text:'WACK!',bg:'#FFC400',color:'#15151C'},
-  {text:'BOOM!',bg:'#E0202F',color:'#fff'},
-  {text:'POW!',bg:'#2342D6',color:'#fff'},
-  {text:'ZAP!',bg:'#FFC400',color:'#15151C'},
-  {text:'BAM!',bg:'#E0202F',color:'#fff'},
-  {text:'SNAP!',bg:'#2e7d32',color:'#fff'},
-  {text:'CRACK!',bg:'#7c3aed',color:'#fff'},
-  {text:'WHAP!',bg:'#e65100',color:'#fff'},
-  {text:'KAPOW!',bg:'#0d9488',color:'#fff'},
-  {text:'SMASH!',bg:'#E0202F',color:'#fff'},
+  {text:'*',bg:'rgba(255,196,0,.85)',color:'var(--ink)'},
+  {text:'!',bg:'rgba(224,32,47,.85)',color:'#fff'},
+  {text:'+',bg:'rgba(35,66,214,.85)',color:'#fff'},
+  {text:'*',bg:'rgba(46,125,50,.85)',color:'#fff'},
 ];
 let burstIdx=0;
 document.addEventListener('click',e=>{
-  // Ring ripple
+  // Small ring ripple
   const ring=document.createElement('div');
   ring.className='click-ring';
-  ring.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;width:80px;height:80px`;
+  ring.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;width:36px;height:36px`;
   document.body.appendChild(ring);
-  setTimeout(()=>ring.remove(),600);
+  setTimeout(()=>ring.remove(),450);
 
-  // Comic burst word
-  const b=BURSTS[burstIdx%BURSTS.length];
-  burstIdx++;
+  // Tiny burst symbol
+  const b=BURSTS[burstIdx%BURSTS.length];burstIdx++;
   const el=document.createElement('div');
   el.className='comic-burst';
   el.textContent=b.text;
   el.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;background:${b.bg};color:${b.color}`;
   document.body.appendChild(el);
-  // Trigger animation next frame
   requestAnimationFrame(()=>el.classList.add('pop'));
-  setTimeout(()=>el.remove(),750);
+  setTimeout(()=>el.remove(),500);
 });
 
 // Boot

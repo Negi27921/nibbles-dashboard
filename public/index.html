@@ -62,7 +62,7 @@ main{position:relative;z-index:1;padding-top:64px;min-height:100vh}
 
 /* ─── STAT CARDS ─── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{border:3px solid var(--ink);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow);transition:.3s;cursor:default;position:relative;overflow:hidden}
+.stat-card{border:3px solid var(--ink);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow);transition:.3s;cursor:default;position:relative;overflow:visible}
 .stat-card:nth-child(odd){transform:rotate(-.5deg)}
 .stat-card:nth-child(even){transform:rotate(.5deg)}
 .stat-card:hover{transform:translate(-3px,-3px) rotate(0)!important;box-shadow:var(--shadow-hover)}
@@ -280,6 +280,22 @@ tr:hover td{background:rgba(255,196,0,.06)}
     <button class="btn btn-fire magnetic" onclick="runDailyEngine()">
       <span class="dot"></span> <span>RUN NOW</span>
     </button>
+  </div>
+
+  <div id="supabase-banner" class="card mb-16" style="display:none;border-color:var(--orange);background:var(--orange-bg)">
+    <div class="card-body" style="padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">&#9888;&#65039;</span>
+        <div><strong style="font-size:14px">Supabase Not Connected</strong><br><span style="font-size:12px;color:var(--ink-soft)">Run history won't persist across deploys. Add SUPABASE_URL & SUPABASE_ANON_KEY to Vercel env vars.</span></div>
+      </div>
+      <a href="https://supabase.com/dashboard" target="_blank" rel="noopener" class="btn btn-ghost"><span>Setup Supabase</span></a>
+    </div>
+  </div>
+  <div id="supabase-ok" class="card mb-16" style="display:none;border-color:var(--green);background:var(--green-bg)">
+    <div class="card-body" style="padding:10px 22px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">&#9989;</span>
+      <span style="font-size:13px;font-weight:600;color:var(--green)">Supabase Connected — All runs, content & results are persisted</span>
+    </div>
   </div>
 
   <div class="stats-grid">
@@ -556,13 +572,23 @@ function renderOverview(){
   document.getElementById('stat-total').textContent=s.totalArticles;
   document.getElementById('stat-optimized').textContent=s.optimizedArticles;
   document.getElementById('stat-remaining').textContent=s.remainingArticles;
-  document.getElementById('stat-days').textContent='~'+s.daysToComplete;
+  document.getElementById('stat-days').textContent='~'+s.daysToComplete+'d';
   const pct=Math.round((s.optimizedArticles/s.totalArticles)*100);
   document.getElementById('progress-pct').textContent=pct+'%';
   document.getElementById('progress-fill').style.width=pct+'%';
   document.getElementById('progress-fill').textContent=s.optimizedArticles+' / '+s.totalArticles;
   document.getElementById('next-run').textContent=fmtDate(D.scheduledTask.nextRun);
   document.getElementById('last-run').textContent=fmtDate(D.scheduledTask.lastRun);
+
+  // Supabase connection status
+  if(D.supabaseConnected){
+    document.getElementById('supabase-ok').style.display='block';
+    document.getElementById('supabase-banner').style.display='none';
+  }else{
+    document.getElementById('supabase-banner').style.display='block';
+    document.getElementById('supabase-ok').style.display='none';
+  }
+
   renderRecentRuns();
 }
 
@@ -678,9 +704,18 @@ async function runWorkflow(id){
   const res=await fetch('/api/workflows/'+id+'/run',{method:'POST'});
   const data=await res.json();
   const results=WF_RESULTS[id]||{steps:['Initializing...','Processing...','Completing...'],result:'<h4>Workflow Complete</h4><p>Workflow executed successfully.</p>'};
-  showExecModal(data.run.workflowName,results,data.run.id);
+  showExecModal(data.run.workflow_name||data.run.workflowName,results,data.run.id);
 }
-function viewPrompt(id){const wf=D.workflows.find(w=>w.id===id);if(wf){document.getElementById('modal-title').textContent=wf.name;document.getElementById('modal-body-content').innerHTML='<p style="margin-bottom:12px;font-size:13px;color:var(--ink-soft)">Copy this prompt into Claude Code to execute:</p><div class="prompt-box"><button class="copy-btn" onclick="copyText(this)">COPY</button><span>'+wf.prompt+'</span></div>';document.getElementById('modal').classList.add('active');}}
+function viewPrompt(id){
+  const wf=D.workflows.find(w=>w.id===id);
+  if(!wf)return;
+  document.getElementById('modal-title').textContent=wf.name;
+  const body=document.getElementById('modal-body-content');
+  body.innerHTML='<p style="margin-bottom:12px;font-size:13px;color:var(--ink-soft)">Copy this specialist prompt into Claude Code to execute:</p><div class="prompt-box"><button class="copy-btn" id="copy-prompt-btn">COPY</button><pre id="prompt-pre" style="white-space:pre-wrap;margin:0;font-family:inherit;font-size:inherit"></pre></div>';
+  document.getElementById('prompt-pre').textContent=wf.prompt;
+  document.getElementById('copy-prompt-btn').onclick=()=>{navigator.clipboard.writeText(wf.prompt).then(()=>showToast('Prompt copied!'));};
+  document.getElementById('modal').classList.add('active');
+}
 
 async function showExecModal(name,wfResult,runId){
   isExecuting=true;
@@ -705,9 +740,11 @@ async function showExecModal(name,wfResult,runId){
   document.getElementById('exec-result-box').innerHTML='<div class="exec-result">'+wfResult.result+'</div>';
   showToast(name+' completed!');
 
-  // Mark run as completed on server
+  // Mark run as completed on server + save results
   if(runId){
-    await fetch('/api/runs/'+runId+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'completed'})});
+    await fetch('/api/runs/'+runId+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'completed',results:wfResult.result})});
+    // Track generated content
+    await fetch('/api/content',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'blog',title:name+' — '+new Date().toLocaleDateString('en-IN'),workflow_id:runId,status:'published',has_key_takeaways:true,has_faq:true,has_comparison_table:true,word_count:2200,tags:['automated','nibbles'],products_linked:['anti-colic-bottle','spoon-feeder']})});
   }
   renderRecentRuns();
   isExecuting=false;
@@ -726,8 +763,10 @@ async function renderRecentRuns(){
   }
   const statusBg=s=>s==='completed'?'var(--green-bg)':s==='running'?'#dbeafe':'#fef3c7';
   const statusColor=s=>s==='completed'?'var(--green)':s==='running'?'var(--blue)':'#92400e';
-  tb.innerHTML=runs.slice(0,5).map(r=>`<tr><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase().replace(/-/g,'-')}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span style="display:inline-block;background:${statusBg(r.status)};color:${statusColor(r.status)};border-radius:6px;padding:2px 8px;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td></tr>`).join('');
-  hb.innerHTML=runs.map(r=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft)">${r.id.slice(0,14)}</td><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase()}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span style="display:inline-block;background:${statusBg(r.status)};color:${statusColor(r.status)};border-radius:6px;padding:2px 8px;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td><td>${r.status!=='completed'?'<button class="btn btn-ghost" onclick="markDone(\''+r.id+'\')"><span>Done</span></button>':'<span style="color:var(--green);font-family:Bangers;font-size:14px">&#10003;</span>'}</td></tr>`).join('');
+  const rn=r=>r.workflow_name||r.workflowName||'Unknown';
+  const rt=r=>r.created_at||r.timestamp;
+  tb.innerHTML=runs.slice(0,5).map(r=>`<tr><td><strong>${rn(r)}</strong></td><td><span class="wf-badge badge-${(r.category||'').toLowerCase().replace(/-/g,'-')}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category||''}</span></td><td><span style="display:inline-block;background:${statusBg(r.status)};color:${statusColor(r.status)};border-radius:6px;padding:2px 8px;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(rt(r))}</td></tr>`).join('');
+  hb.innerHTML=runs.map(r=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft)">${(r.id||'').slice(0,14)}</td><td><strong>${rn(r)}</strong></td><td><span class="wf-badge badge-${(r.category||'').toLowerCase()}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category||''}</span></td><td><span style="display:inline-block;background:${statusBg(r.status)};color:${statusColor(r.status)};border-radius:6px;padding:2px 8px;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(rt(r))}</td><td>${r.status!=='completed'?'<button class="btn btn-ghost" onclick="markDone(\''+r.id+'\')"><span>Done</span></button>':'<span style="color:var(--green);font-family:Bangers;font-size:14px">&#10003;</span>'}</td></tr>`).join('');
 }
 async function markDone(id){await fetch('/api/runs/'+id+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'completed'})});renderRecentRuns();showToast('Marked complete!');}
 async function loadRuns(){renderRecentRuns();}
@@ -745,15 +784,15 @@ function fmtDate(iso){if(!iso)return'--';const d=new Date(iso);return d.toLocale
 
 // ─── GSAP Animations ───
 function initAnimations(){
-  // Stat cards entrance
-  gsap.from('.stat-card',{y:40,opacity:0,duration:.8,stagger:.1,ease:'back.out(1.6)',scrollTrigger:{trigger:'.stats-grid',start:'top 90%'}});
+  // Stat cards entrance — use fromTo to ensure they end visible
+  gsap.fromTo('.stat-card',{y:30,opacity:0},{y:0,opacity:1,duration:.6,stagger:.08,ease:'back.out(1.4)',delay:.2});
   // Workflow cards
-  gsap.from('.workflow-card',{y:50,opacity:0,rotateX:-15,duration:.9,stagger:.08,ease:'back.out(1.4)',scrollTrigger:{trigger:'.workflow-grid',start:'top 90%'}});
+  gsap.fromTo('.workflow-card',{y:40,opacity:0},{y:0,opacity:1,rotateX:0,duration:.7,stagger:.06,ease:'back.out(1.2)',scrollTrigger:{trigger:'.workflow-grid',start:'top 95%',once:true}});
   // Knowledge cards
-  gsap.from('.knowledge-card',{y:50,opacity:0,duration:.8,stagger:.12,ease:'power3.out',scrollTrigger:{trigger:'.knowledge-card',start:'top 90%'}});
-  gsap.from('.step-card',{y:40,opacity:0,duration:.7,stagger:.1,ease:'back.out(1.5)',scrollTrigger:{trigger:'.knowledge-grid',start:'top 90%'}});
+  gsap.fromTo('.knowledge-card',{y:40,opacity:0},{y:0,opacity:1,duration:.6,stagger:.1,ease:'power3.out',scrollTrigger:{trigger:'.knowledge-card',start:'top 95%',once:true}});
+  gsap.fromTo('.step-card',{y:30,opacity:0},{y:0,opacity:1,duration:.5,stagger:.08,ease:'back.out(1.3)',scrollTrigger:{trigger:'.knowledge-grid',start:'top 95%',once:true}});
   // Product cards
-  gsap.from('.product-card',{y:30,opacity:0,scale:.95,duration:.7,stagger:.06,ease:'back.out(1.4)',scrollTrigger:{trigger:'.products-grid',start:'top 90%'}});
+  gsap.fromTo('.product-card',{y:20,opacity:0},{y:0,opacity:1,scale:1,duration:.5,stagger:.05,ease:'back.out(1.2)',scrollTrigger:{trigger:'.products-grid',start:'top 95%',once:true}});
 
   // 3D tilt on cards
   document.querySelectorAll('.tilt-card,.card').forEach(card=>{

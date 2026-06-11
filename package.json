@@ -10,10 +10,15 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["nibbles", "marketing", "dashboard"],
+  "keywords": [
+    "nibbles",
+    "marketing",
+    "dashboard"
+  ],
   "author": "Team Nibbles",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "node-fetch": "^2.7.0"

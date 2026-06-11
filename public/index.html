@@ -1,1159 +1,703 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nibbles Marketing Engine — Command Center</title>
-  <style>
-    :root {
-      --blue: #2563eb;
-      --blue-dark: #1e40af;
-      --blue-light: #dbeafe;
-      --blue-bg: #f0f4ff;
-      --green: #2e7d32;
-      --green-bg: #e8f5e9;
-      --orange: #e65100;
-      --orange-bg: #fff3e0;
-      --yellow: #f59e0b;
-      --yellow-bg: #fef3c7;
-      --red: #dc2626;
-      --red-bg: #fef2f2;
-      --purple: #7c3aed;
-      --purple-bg: #f5f3ff;
-      --teal: #0d9488;
-      --gray: #6b7280;
-      --gray-light: #f3f4f6;
-      --gray-dark: #374151;
-      --dark: #111827;
-      --white: #ffffff;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
-      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nibbles Command Center — Marketing Engine</title>
+<meta name="description" content="Nibbles Marketing Engine Command Center. Control 14 automated workflows, track blog optimization, and hyperscale organic growth.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Archivo:wght@400;500;600;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBFAF5;--paper-2:#F2EFE6;--ink:#15151C;--ink-soft:#4A4A58;
+  --red:#E0202F;--red-deep:#B30E1E;--blue:#2342D6;--blue-deep:#16289B;
+  --yellow:#FFC400;--green:#2e7d32;--green-bg:#e8f5e9;--orange:#e65100;
+  --orange-bg:#fff3e0;--teal:#0d9488;--purple:#7c3aed;
+  --line:rgba(21,21,28,.12);--radius:16px;
+  --shadow:5px 5px 0 var(--ink);--shadow-hover:9px 9px 0 var(--ink);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Archivo',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;overflow-x:hidden}
+::selection{background:var(--yellow);color:var(--ink)}
+a{color:inherit;text-decoration:none}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+/* Halftone texture */
+.halftone{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3;
+  background-image:radial-gradient(rgba(21,21,28,.07) 1px,transparent 1.4px);background-size:14px 14px}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f8fafc;
-      color: var(--dark);
-      min-height: 100vh;
-    }
+/* Scroll progress */
+.progress{position:fixed;top:0;left:0;height:4px;width:100%;z-index:9000}
+.progress i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--red) 0 30px,var(--blue) 30px 60px);transition:width .15s}
 
-    /* ─── Header ─── */
-    .header {
-      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
-      color: white;
-      padding: 20px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: var(--shadow-lg);
-    }
-    .header-left { display: flex; align-items: center; gap: 16px; }
-    .header-logo {
-      width: 42px; height: 42px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 800;
-    }
-    .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
-    .header p { font-size: 12px; opacity: 0.75; margin-top: 2px; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .header-status {
-      background: rgba(255,255,255,0.15);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #4ade80;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:8000;display:flex;justify-content:space-between;align-items:center;padding:14px clamp(16px,4vw,48px);background:rgba(251,250,245,.82);backdrop-filter:blur(12px);border-bottom:3px solid var(--ink)}
+.nav-logo{font-family:'Bangers',cursive;font-size:26px;letter-spacing:.06em;display:flex;align-items:center;gap:10px}
+.nav-logo .dot{width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid var(--ink);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.nav-logo span{color:var(--red)}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:8px 16px;border:2px solid transparent;border-radius:10px;cursor:pointer;color:var(--ink-soft);background:none;transition:.25s;position:relative}
+.nav-tab:hover{color:var(--ink);background:var(--paper-2)}
+.nav-tab.active{color:var(--ink);background:var(--yellow);border-color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.nav-tab .badge-count{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink)}
+.nav-visit{font-family:'Bangers',cursive;font-size:15px;letter-spacing:.08em;border:3px solid var(--ink);padding:7px 18px;border-radius:99px;background:var(--yellow);box-shadow:3px 3px 0 var(--ink);transition:.25s}
+.nav-visit:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+@media(max-width:860px){.nav-tabs{display:none}.nav-visit{display:none}}
 
-    /* ─── Nav Tabs ─── */
-    .nav {
-      background: white;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0 32px;
-      display: flex;
-      gap: 4px;
-      box-shadow: var(--shadow);
-    }
-    .nav-tab {
-      padding: 14px 20px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--gray);
-      border: none;
-      background: none;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-    }
-    .nav-tab:hover { color: var(--blue); }
-    .nav-tab.active {
-      color: var(--blue);
-      border-bottom-color: var(--blue);
-    }
+/* ─── MAIN ─── */
+main{position:relative;z-index:1;padding-top:64px;min-height:100vh}
+.tab-content{display:none;padding:clamp(20px,4vw,40px)}
+.tab-content.active{display:block}
 
-    /* ─── Main Content ─── */
-    .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+/* ─── CARDS (3D tilt) ─── */
+.card{position:relative;border:3px solid var(--ink);border-radius:var(--radius);background:var(--paper);box-shadow:var(--shadow);transition:box-shadow .3s,transform .3s;overflow:hidden;transform-style:preserve-3d;will-change:transform}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(255,196,0,.25),transparent 45%);opacity:0;transition:opacity .4s;pointer-events:none;z-index:1}
+.card:hover::before{opacity:1}
+.card:hover{box-shadow:var(--shadow-hover)}
+.card-header{padding:16px 22px;border-bottom:2px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+.card-header h3{font-family:'Bangers',cursive;font-size:18px;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.card-body{padding:22px;position:relative;z-index:2}
 
-    /* ─── Cards ─── */
-    .card {
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid #e5e7eb;
-      overflow: hidden;
-      transition: box-shadow 0.2s;
-    }
-    .card:hover { box-shadow: var(--shadow-md); }
-    .card-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #f3f4f6;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .card-header h3 {
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-body { padding: 20px; }
+/* ─── STAT CARDS ─── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{border:3px solid var(--ink);border-radius:var(--radius);padding:22px 20px;background:var(--paper);box-shadow:var(--shadow);transition:.3s;cursor:default;position:relative;overflow:hidden}
+.stat-card:nth-child(odd){transform:rotate(-.5deg)}
+.stat-card:nth-child(even){transform:rotate(.5deg)}
+.stat-card:hover{transform:translate(-3px,-3px) rotate(0)!important;box-shadow:var(--shadow-hover);background:#fff}
+.stat-card::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:.25s;z-index:10}
+.stat-card:hover::after{opacity:1;transform:translateX(-50%) translateY(-4px)}
+.stat-value{font-family:'Bangers',cursive;font-size:clamp(32px,4vw,48px);color:var(--red);text-shadow:2px 2px 0 var(--ink);line-height:1}
+.stat-card:nth-child(2) .stat-value{color:var(--green)}
+.stat-card:nth-child(3) .stat-value{color:var(--orange)}
+.stat-card:nth-child(4) .stat-value{color:var(--blue)}
+.stat-card:nth-child(5) .stat-value{color:var(--purple)}
+.stat-card:nth-child(6) .stat-value{color:var(--teal)}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-top:6px;font-weight:500}
 
-    /* ─── Stats Grid ─── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: white;
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      border: 1px solid #e5e7eb;
-      position: relative;
-      overflow: hidden;
-    }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-    }
-    .stat-card.blue::before { background: var(--blue); }
-    .stat-card.green::before { background: var(--green); }
-    .stat-card.orange::before { background: var(--orange); }
-    .stat-card.purple::before { background: var(--purple); }
-    .stat-card.teal::before { background: var(--teal); }
-    .stat-card.yellow::before { background: var(--yellow); }
-    .stat-value { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
-    .stat-label { font-size: 12px; color: var(--gray); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+/* ─── ENGINE PANEL ─── */
+.engine-panel{border:3px solid var(--ink);border-radius:var(--radius);background:var(--ink);color:var(--paper);padding:clamp(24px,4vw,40px);margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.engine-panel::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,196,0,.08) 1px,transparent 1.4px);background-size:12px 12px;pointer-events:none}
+.engine-panel h2{font-family:'Bangers',cursive;font-size:clamp(26px,4vw,38px);letter-spacing:.04em;text-shadow:2px 2px 0 rgba(224,32,47,.5)}
+.engine-panel p{font-size:14px;opacity:.7;margin-top:6px;max-width:500px}
+.engine-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+.engine-meta-item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:8px 16px;border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.engine-meta-item strong{display:block;font-family:'Archivo',sans-serif;font-size:14px;font-weight:700;margin-top:2px}
+@media(max-width:860px){.engine-panel{flex-direction:column;text-align:center}}
 
-    /* ─── Progress Bar ─── */
-    .progress-section { margin-bottom: 24px; }
-    .progress-bar-container {
-      background: #e5e7eb;
-      border-radius: 10px;
-      height: 20px;
-      overflow: hidden;
-      margin: 10px 0;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--blue), var(--teal));
-      border-radius: 10px;
-      transition: width 1s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: white;
-      min-width: 60px;
-    }
-    .progress-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--gray);
-    }
+/* ─── BUTTONS (magnetic + hover) ─── */
+.btn{position:relative;display:inline-flex;align-items:center;gap:10px;font-family:'Bangers',cursive;font-size:18px;letter-spacing:.06em;padding:12px 28px;border-radius:12px;border:3px solid var(--ink);cursor:pointer;transition:.25s;will-change:transform;overflow:hidden;background:var(--paper);color:var(--ink)}
+.btn::after{content:"";position:absolute;inset:0;background:var(--yellow);transform:translateY(100%);transition:transform .3s;z-index:0}
+.btn:hover::after{transform:translateY(0)}
+.btn span,.btn svg{position:relative;z-index:1}
+.btn-fire{background:var(--red);color:#fff;box-shadow:var(--shadow);font-size:22px;padding:16px 36px}
+.btn-fire::after{background:var(--yellow)}
+.btn-fire:hover{transform:translate(-3px,-3px) rotate(-1deg);box-shadow:var(--shadow-hover);color:var(--ink)}
+.btn-run{background:var(--paper);box-shadow:3px 3px 0 var(--ink);font-size:14px;padding:8px 18px}
+.btn-run:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.btn-ghost{background:transparent;border-color:var(--line);font-size:13px;padding:6px 14px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn .dot{width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid var(--ink);animation:pulse 1.2s infinite}
 
-    /* ─── Daily Engine Panel ─── */
-    .engine-panel {
-      background: linear-gradient(135deg, var(--blue-dark) 0%, #1a365d 100%);
-      border-radius: var(--radius);
-      padding: 28px;
-      color: white;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      box-shadow: var(--shadow-lg);
-    }
-    .engine-info h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
-    .engine-info p { font-size: 13px; opacity: 0.8; line-height: 1.5; }
-    .engine-meta {
-      display: flex; gap: 20px; margin-top: 12px;
-    }
-    .engine-meta-item {
-      background: rgba(255,255,255,0.1);
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-    }
-    .engine-meta-item strong { display: block; font-size: 14px; }
+/* ─── PROGRESS BAR ─── */
+.progress-container{border:3px solid var(--ink);border-radius:10px;height:22px;overflow:hidden;background:var(--paper-2);box-shadow:inset 0 2px 4px rgba(0,0,0,.08)}
+.progress-fill{height:100%;background:repeating-linear-gradient(45deg,var(--red) 0 14px,var(--blue) 14px 28px);border-radius:8px;transition:width 1.5s ease;display:flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:12px;color:#fff;text-shadow:1px 1px 0 var(--ink);min-width:50px}
 
-    /* ─── Buttons ─── */
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-primary {
-      background: var(--blue);
-      color: white;
-    }
-    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-    .btn-success { background: var(--green); color: white; }
-    .btn-success:hover { background: #1b5e20; }
-    .btn-warning { background: var(--yellow); color: var(--dark); }
-    .btn-danger { background: var(--red); color: white; }
-    .btn-large {
-      padding: 14px 32px;
-      font-size: 15px;
-      border-radius: 10px;
-    }
-    .btn-outline {
-      background: transparent;
-      border: 1.5px solid currentColor;
-      color: var(--blue);
-    }
-    .btn-sm { padding: 6px 12px; font-size: 11px; }
+/* ─── WORKFLOW CARDS ─── */
+.workflow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:18px}
+.workflow-card{border:3px solid var(--ink);border-radius:var(--radius);padding:22px;background:var(--paper);box-shadow:var(--shadow);display:flex;gap:14px;transition:.3s;position:relative;transform-style:preserve-3d;will-change:transform;overflow:hidden}
+.workflow-card::before{content:"";position:absolute;inset:0;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),rgba(255,196,0,.3),transparent 45%);opacity:0;transition:opacity .4s;pointer-events:none}
+.workflow-card:hover::before{opacity:1}
+.workflow-card:hover{transform:translate(-3px,-3px)!important;box-shadow:var(--shadow-hover)}
+.workflow-card:nth-child(odd){transform:rotate(-.3deg)}
+.workflow-card:nth-child(even){transform:rotate(.3deg)}
+.wf-num{width:40px;height:40px;border-radius:12px;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:18px;color:#fff;flex-shrink:0}
+.wf-content{flex:1}
+.wf-content h4{font-family:'Bangers',cursive;font-size:17px;letter-spacing:.04em;margin-bottom:3px}
+.wf-content p{font-size:12px;color:var(--ink-soft);font-weight:500}
+.wf-badge{position:absolute;top:0;right:20px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:4px 10px;border-radius:0 0 8px 8px;border:2px solid var(--ink);border-top:none}
+.wf-actions{display:flex;gap:8px;margin-top:12px}
 
-    /* ─── Workflow Grid ─── */
-    .workflow-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 16px;
-    }
-    .workflow-card {
-      background: white;
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      border: 1px solid #e5e7eb;
-      display: flex;
-      gap: 14px;
-      transition: all 0.2s;
-      position: relative;
-    }
-    .workflow-card:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-    .workflow-num {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 14px; color: white;
-      flex-shrink: 0;
-    }
-    .workflow-content { flex: 1; }
-    .workflow-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .workflow-content p { font-size: 12px; color: var(--gray); line-height: 1.4; }
-    .workflow-badge {
-      position: absolute;
-      top: 12px; right: 12px;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .workflow-actions {
-      display: flex; gap: 8px; margin-top: 10px;
-    }
+.badge-automated{background:var(--green-bg);color:var(--green)}
+.badge-on-demand{background:#dbeafe;color:var(--blue)}
+.badge-weekly{background:#fef3c7;color:#92400e}
+.badge-monthly{background:var(--orange-bg);color:var(--orange)}
+.badge-conditional{background:#f3f4f6;color:#6b7280}
 
-    /* ─── Category badges ─── */
-    .badge-automated { background: var(--green-bg); color: var(--green); }
-    .badge-on-demand { background: var(--blue-light); color: var(--blue); }
-    .badge-weekly { background: var(--yellow-bg); color: #92400e; }
-    .badge-monthly { background: var(--orange-bg); color: var(--orange); }
-    .badge-conditional { background: var(--gray-light); color: var(--gray); }
+/* ─── ARTICLES TABLE ─── */
+.table-wrap{overflow-x:auto;border:3px solid var(--ink);border-radius:var(--radius);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);background:var(--paper-2);border-bottom:2px solid var(--ink);font-weight:600}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--line)}
+tr:hover td{background:rgba(255,196,0,.06)}
+.opt-yes{color:var(--green);font-family:'Bangers',cursive;font-size:15px}
+.opt-no{color:var(--red);font-family:'Bangers',cursive;font-size:15px}
+.tag-chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-family:'JetBrains Mono',monospace;border:1px solid var(--line);margin:1px;background:var(--paper-2);font-weight:500}
 
-    /* ─── Run History Table ─── */
-    .runs-table { width: 100%; border-collapse: collapse; }
-    .runs-table th {
-      text-align: left;
-      padding: 10px 14px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--gray);
-      background: var(--gray-light);
-      font-weight: 600;
-    }
-    .runs-table td {
-      padding: 12px 14px;
-      font-size: 13px;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    .status-badge {
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .status-queued { background: var(--yellow-bg); color: #92400e; }
-    .status-running { background: var(--blue-light); color: var(--blue); }
-    .status-completed { background: var(--green-bg); color: var(--green); }
+/* ─── PRODUCT CARDS ─── */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.product-card{border:3px solid var(--ink);border-radius:var(--radius);padding:20px;background:var(--paper);box-shadow:var(--shadow);transition:.3s}
+.product-card:nth-child(odd){transform:rotate(-.5deg)}
+.product-card:nth-child(even){transform:rotate(.5deg)}
+.product-card:hover{transform:translate(-3px,-3px) rotate(0)!important;box-shadow:var(--shadow-hover);background:#fff}
+.product-cat{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:6px}
+.product-card h4{font-family:'Bangers',cursive;font-size:18px;letter-spacing:.03em;margin-bottom:4px}
+.product-price{font-family:'Bangers',cursive;font-size:26px;color:var(--red);text-shadow:1px 1px 0 var(--ink)}
+.product-handle{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-soft);margin-top:6px;word-break:break-all}
 
-    /* ─── Articles Table ─── */
-    .articles-table { width: 100%; border-collapse: collapse; }
-    .articles-table th {
-      text-align: left; padding: 10px 14px;
-      font-size: 11px; text-transform: uppercase;
-      letter-spacing: 0.5px; color: var(--gray);
-      background: var(--gray-light); font-weight: 600;
-    }
-    .articles-table td {
-      padding: 10px 14px; font-size: 13px;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    .opt-yes { color: var(--green); font-weight: 600; }
-    .opt-no { color: var(--red); font-weight: 600; }
+/* ─── CALENDAR ─── */
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.cal-day{border:2px solid var(--ink);border-radius:12px;padding:14px 8px;text-align:center;transition:.25s;cursor:default}
+.cal-day:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
+.cal-day .day-name{font-family:'Bangers',cursive;font-size:16px;letter-spacing:.06em;margin-bottom:4px}
+.cal-day .day-topic{font-size:11px;color:var(--ink-soft);font-weight:500;line-height:1.3}
+@media(max-width:700px){.calendar-grid{grid-template-columns:repeat(4,1fr)}}
 
-    /* ─── Products Grid ─── */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-    .product-card {
-      background: white;
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-      border: 1px solid #e5e7eb;
-    }
-    .product-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .product-card .price {
-      font-size: 18px; font-weight: 800; color: var(--blue);
-    }
-    .product-card .handle {
-      font-size: 10px; color: var(--gray); margin-top: 4px;
-      word-break: break-all;
-    }
-    .product-category {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 8px;
-      font-size: 10px;
-      font-weight: 600;
-      background: var(--blue-light);
-      color: var(--blue);
-      margin-bottom: 6px;
-    }
+/* ─── KNOWLEDGE HUB ─── */
+.knowledge-section{margin-bottom:40px}
+.knowledge-section .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:14px;margin-bottom:16px;font-weight:600}
+.knowledge-section .eyebrow::before{content:"";width:36px;height:3px;background:var(--red)}
+.knowledge-section h2{font-family:'Bangers',cursive;font-size:clamp(32px,5vw,52px);letter-spacing:.02em;margin-bottom:20px;text-transform:uppercase}
+.knowledge-section h2 .accent{color:var(--red);text-shadow:2px 2px 0 var(--ink)}
+.knowledge-section h2 .accent-b{color:var(--blue);text-shadow:2px 2px 0 var(--ink)}
+.knowledge-card{border:3px solid var(--ink);border-radius:var(--radius);padding:28px;background:var(--paper);box-shadow:var(--shadow);margin-bottom:18px;transition:.3s}
+.knowledge-card:hover{transform:translate(-3px,-3px);box-shadow:var(--shadow-hover)}
+.knowledge-card h3{font-family:'Bangers',cursive;font-size:22px;letter-spacing:.04em;margin-bottom:10px;color:var(--ink)}
+.knowledge-card p{font-size:14px;color:var(--ink-soft);line-height:1.7;font-weight:500}
+.knowledge-card ul{margin:10px 0;padding-left:20px}
+.knowledge-card li{font-size:14px;color:var(--ink-soft);margin-bottom:6px;font-weight:500}
+.knowledge-card li b{color:var(--ink)}
+.knowledge-card .why-box{background:var(--yellow);border:2px solid var(--ink);border-radius:10px;padding:14px 18px;margin-top:14px;font-family:'Bangers',cursive;font-size:16px;letter-spacing:.04em;transform:rotate(-.5deg);box-shadow:3px 3px 0 var(--ink)}
+.knowledge-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.step-card{border:3px solid var(--ink);border-radius:var(--radius);padding:24px;background:var(--paper);box-shadow:var(--shadow);transition:.3s}
+.step-card:nth-child(odd){transform:rotate(-.5deg)}
+.step-card:nth-child(even){transform:rotate(.5deg)}
+.step-card:hover{transform:translate(-3px,-3px) rotate(0)!important;box-shadow:var(--shadow-hover);background:#fff}
+.step-num{font-family:'Bangers',cursive;font-size:36px;color:var(--paper);-webkit-text-stroke:2px var(--ink);text-shadow:3px 3px 0 var(--red)}
+.step-card h4{font-family:'Bangers',cursive;font-size:19px;margin:6px 0 4px;letter-spacing:.04em}
+.step-card p{font-size:13px;color:var(--ink-soft);font-weight:500}
 
-    /* ─── Modal ─── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      background: white;
-      border-radius: 16px;
-      max-width: 640px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-    }
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-header h3 { font-size: 18px; font-weight: 700; }
-    .modal-close {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      border: none;
-      background: var(--gray-light);
-      cursor: pointer;
-      font-size: 16px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .modal-body { padding: 24px; }
-    .prompt-box {
-      background: #1e293b;
-      color: #e2e8f0;
-      padding: 16px;
-      border-radius: 10px;
-      font-family: 'SF Mono', 'Menlo', monospace;
-      font-size: 12px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-word;
-      position: relative;
-    }
-    .copy-btn {
-      position: absolute;
-      top: 8px; right: 8px;
-      padding: 4px 12px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 11px;
-    }
-    .copy-btn:hover { background: rgba(255,255,255,0.2); }
-    .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
+/* ─── MARQUEE ─── */
+.marquee{border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);overflow:hidden;padding:12px 0;background:var(--ink);transform:rotate(-.8deg) scale(1.02);margin:20px 0}
+.marquee.m2{background:var(--red);transform:rotate(.6deg) scale(1.02)}
+.marquee-track{display:flex;width:max-content;font-family:'Bangers',cursive;font-size:22px;text-transform:uppercase;letter-spacing:.12em;color:var(--paper);animation:marquee 20s linear infinite}
+.marquee-track span{padding:0 24px;white-space:nowrap}
+.marquee-track .hl{color:var(--yellow)}
+@keyframes marquee{to{transform:translateX(-50%)}}
 
-    /* ─── Section Headers ─── */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .section-header h2 {
-      font-size: 18px;
-      font-weight: 800;
-    }
+/* ─── MODAL ─── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(21,21,28,.6);z-index:9500;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex}
+.modal{background:var(--paper);border:3px solid var(--ink);border-radius:20px;max-width:660px;width:92%;max-height:82vh;overflow-y:auto;box-shadow:12px 12px 0 var(--ink)}
+.modal-header{padding:20px 24px;border-bottom:3px solid var(--ink);display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-family:'Bangers',cursive;font-size:22px;letter-spacing:.04em}
+.modal-close{width:36px;height:36px;border-radius:10px;border:2px solid var(--ink);background:var(--paper-2);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.modal-close:hover{background:var(--red);color:#fff}
+.modal-body{padding:24px}
+.prompt-box{background:var(--ink);color:#e2e8f0;padding:18px;border-radius:12px;border:2px solid rgba(255,255,255,.1);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-word;position:relative}
+.copy-btn{position:absolute;top:10px;right:10px;padding:5px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;transition:.2s}
+.copy-btn:hover{background:var(--yellow);color:var(--ink)}
+.modal-footer{padding:16px 24px;border-top:2px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
 
-    /* ─── Grid layouts ─── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-    .mb-24 { margin-bottom: 24px; }
-    .mb-16 { margin-bottom: 16px; }
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:14px 24px;border-radius:12px;border:3px solid var(--yellow);font-family:'Bangers',cursive;font-size:16px;letter-spacing:.06em;box-shadow:6px 6px 0 var(--ink);z-index:9600;transform:translateY(100px);opacity:0;transition:.4s}
+.toast.show{transform:translateY(0);opacity:1}
 
-    /* ─── Content Calendar ─── */
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-    }
-    .calendar-day {
-      padding: 12px 8px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 12px;
-    }
-    .calendar-day .day-name {
-      font-weight: 700;
-      font-size: 11px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .calendar-day .day-topic {
-      font-size: 11px;
-      line-height: 1.3;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      background: var(--dark);
-      color: white;
-      padding: 14px 24px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: var(--shadow-lg);
-      z-index: 300;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 768px) {
-      .main { padding: 16px; }
-      .header { padding: 16px; }
-      .engine-panel { flex-direction: column; text-align: center; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .workflow-grid { grid-template-columns: 1fr; }
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      .nav { overflow-x: auto; }
-    }
-  </style>
+/* ─── GRIDS ─── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.mb-24{margin-bottom:24px}
+.mb-16{margin-bottom:16px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.section-header h2{font-family:'Bangers',cursive;font-size:clamp(24px,3.5vw,36px);letter-spacing:.04em}
+@media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr}.workflow-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
-<!-- Header -->
-<header class="header">
-  <div class="header-left">
-    <div class="header-logo">N</div>
-    <div>
-      <h1>Nibbles Command Center</h1>
-      <p>Organic Marketing Engine Dashboard</p>
-    </div>
-  </div>
-  <div class="header-right">
-    <div class="header-status">
-      <span class="status-dot"></span>
-      Engine Active
-    </div>
-    <a href="https://thenibbles.shop" target="_blank" class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3); font-size:12px; padding:6px 14px;">
-      Visit Store
-    </a>
-  </div>
-</header>
+<div class="halftone"></div>
+<div class="progress"><i id="progFill"></i></div>
 
-<!-- Navigation -->
-<nav class="nav">
-  <button class="nav-tab active" data-tab="overview">Overview</button>
-  <button class="nav-tab" data-tab="workflows">Workflows</button>
-  <button class="nav-tab" data-tab="articles">Blog Articles</button>
-  <button class="nav-tab" data-tab="products">Products</button>
-  <button class="nav-tab" data-tab="history">Run History</button>
+<nav>
+  <div class="nav-logo"><span class="dot"></span> NIBBLES<span>.</span>ENGINE</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="overview">Overview</button>
+    <button class="nav-tab" data-tab="workflows">Workflows <span class="badge-count">14</span></button>
+    <button class="nav-tab" data-tab="articles">Articles</button>
+    <button class="nav-tab" data-tab="products">Products</button>
+    <button class="nav-tab" data-tab="knowledge">Knowledge Hub</button>
+    <button class="nav-tab" data-tab="history">History</button>
+  </div>
+  <a class="nav-visit" href="https://thenibbles.shop" target="_blank" rel="noopener">Visit Store &#8599;</a>
 </nav>
 
-<!-- Main Content -->
-<main class="main">
+<main>
 
-  <!-- ═══ OVERVIEW TAB ═══ -->
-  <div id="tab-overview" class="tab-content active">
+<!-- ═══ OVERVIEW ═══ -->
+<div id="tab-overview" class="tab-content active">
 
-    <!-- Daily Engine Control -->
-    <div class="engine-panel">
-      <div class="engine-info">
-        <h2>Daily Blog Engine</h2>
-        <p>Optimizes 3 oldest unoptimized articles + creates 1 new blog post daily. Runs automatically at 7:30 AM IST.</p>
-        <div class="engine-meta">
-          <div class="engine-meta-item">
-            Schedule<br><strong>7:30 AM IST</strong>
-          </div>
-          <div class="engine-meta-item">
-            Status<br><strong style="color:#4ade80;">Active</strong>
-          </div>
-          <div class="engine-meta-item">
-            Next Run<br><strong id="next-run">Loading...</strong>
-          </div>
-          <div class="engine-meta-item">
-            Last Run<br><strong id="last-run">Loading...</strong>
-          </div>
-        </div>
-      </div>
-      <button class="btn btn-success btn-large" onclick="runDailyEngine()">
-        <span style="font-size:18px;">&#9654;</span> Run Now
-      </button>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-value" id="stat-total">--</div>
-        <div class="stat-label">Total Articles</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-value" id="stat-optimized">--</div>
-        <div class="stat-label">Optimized</div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-value" id="stat-remaining">--</div>
-        <div class="stat-label">Remaining</div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-value" id="stat-days">--</div>
-        <div class="stat-label">Days to Complete</div>
-      </div>
-      <div class="stat-card teal">
-        <div class="stat-value">14</div>
-        <div class="stat-label">Total Workflows</div>
-      </div>
-      <div class="stat-card yellow">
-        <div class="stat-value">11</div>
-        <div class="stat-label">Products</div>
+  <div class="engine-panel">
+    <div>
+      <h2>Daily Blog Engine</h2>
+      <p>Optimizes 3 oldest unoptimized articles + creates 1 new blog post. Runs at 7:30 AM IST daily.</p>
+      <div class="engine-meta">
+        <div class="engine-meta-item">Schedule<br><strong>7:30 AM IST</strong></div>
+        <div class="engine-meta-item">Status<br><strong style="color:#4ade80;">Active</strong></div>
+        <div class="engine-meta-item">Next Run<br><strong id="next-run">--</strong></div>
+        <div class="engine-meta-item">Last Run<br><strong id="last-run">--</strong></div>
       </div>
     </div>
+    <button class="btn btn-fire magnetic" onclick="runDailyEngine()">
+      <span class="dot"></span> <span>RUN NOW</span>
+    </button>
+  </div>
 
-    <!-- Progress -->
-    <div class="card mb-24">
-      <div class="card-header">
-        <h3>Blog Optimization Progress</h3>
-        <span id="progress-pct" style="font-weight:700; color:var(--blue);">--%</span>
+  <div class="stats-grid">
+    <div class="stat-card" data-tooltip="Total blog articles on thenibbles.shop"><div class="stat-value" id="stat-total">51</div><div class="stat-label">Total Articles</div></div>
+    <div class="stat-card" data-tooltip="Articles with Key Takeaways + FAQ + product links"><div class="stat-value" id="stat-optimized">6</div><div class="stat-label">Optimized</div></div>
+    <div class="stat-card" data-tooltip="Articles still needing SEO/AEO optimization"><div class="stat-value" id="stat-remaining">45</div><div class="stat-label">Remaining</div></div>
+    <div class="stat-card" data-tooltip="At 3 articles/day, estimated completion"><div class="stat-value" id="stat-days">~15</div><div class="stat-label">Days Left</div></div>
+    <div class="stat-card" data-tooltip="14 TripleDart marketing workflows active"><div class="stat-value">14</div><div class="stat-label">Workflows</div></div>
+    <div class="stat-card" data-tooltip="11 products available for internal linking"><div class="stat-value">11</div><div class="stat-label">Products</div></div>
+  </div>
+
+  <div class="card mb-24">
+    <div class="card-header">
+      <h3>Optimization Progress</h3>
+      <span id="progress-pct" style="font-family:'Bangers',cursive;font-size:18px;color:var(--red);">12%</span>
+    </div>
+    <div class="card-body">
+      <div class="progress-container">
+        <div class="progress-fill" id="progress-fill" style="width:12%;">6 / 51</div>
       </div>
-      <div class="card-body">
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" id="progress-fill" style="width: 0%;">0%</div>
-        </div>
-        <div class="progress-labels">
-          <span>0 articles</span>
-          <span id="progress-total">-- articles</span>
-        </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft);letter-spacing:.1em">
+        <span>0 articles</span><span>51 articles</span>
       </div>
     </div>
+  </div>
 
-    <!-- Two-column: Calendar + Quick Workflows -->
-    <div class="grid-2 mb-24">
-      <!-- Content Calendar -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Weekly Content Calendar</h3>
-        </div>
-        <div class="card-body">
-          <div class="calendar-grid">
-            <div class="calendar-day" style="background:var(--blue-bg);">
-              <div class="day-name" style="color:var(--blue);">Mon</div>
-              <div class="day-topic">Feeding / Milestone Guide</div>
-            </div>
-            <div class="calendar-day" style="background:var(--green-bg);">
-              <div class="day-name" style="color:var(--green);">Tue</div>
-              <div class="day-topic">Product Comparison</div>
-            </div>
-            <div class="calendar-day" style="background:var(--orange-bg);">
-              <div class="day-name" style="color:var(--orange);">Wed</div>
-              <div class="day-topic">Seasonal / Topical</div>
-            </div>
-            <div class="calendar-day" style="background:var(--purple-bg);">
-              <div class="day-name" style="color:var(--teal);">Thu</div>
-              <div class="day-topic">Parenting Tips</div>
-            </div>
-            <div class="calendar-day" style="background:var(--blue-bg);">
-              <div class="day-name" style="color:var(--blue-dark);">Fri</div>
-              <div class="day-topic">Product Deep-Dive</div>
-            </div>
-            <div class="calendar-day" style="background:var(--red-bg);">
-              <div class="day-name" style="color:var(--red);">Sat</div>
-              <div class="day-topic">Myth-Busting / FAQ</div>
-            </div>
-            <div class="calendar-day" style="background:var(--purple-bg);">
-              <div class="day-name" style="color:var(--purple);">Sun</div>
-              <div class="day-topic">Gift Guide / Bundle</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Workflow Launch -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Quick Launch</h3>
-        </div>
-        <div class="card-body" style="display:flex; flex-direction:column; gap:8px;">
-          <button class="btn btn-success" onclick="runWorkflow(1)" style="justify-content:flex-start;">
-            <span>&#9654;</span> Content Refresh Agent
-          </button>
-          <button class="btn btn-success" onclick="runWorkflow(2)" style="justify-content:flex-start;">
-            <span>&#9654;</span> Blog Revamp Workflow
-          </button>
-          <button class="btn btn-primary" onclick="runWorkflow(6)" style="justify-content:flex-start;">
-            <span>&#9654;</span> Competitor Page Generator
-          </button>
-          <button class="btn btn-primary" onclick="runWorkflow(5)" style="justify-content:flex-start;">
-            <span>&#9654;</span> Listicle Article Generator
-          </button>
-          <button class="btn btn-warning" onclick="runWorkflow(10)" style="justify-content:flex-start;">
-            <span>&#9654;</span> Weekly Performance Report
-          </button>
-          <button class="btn btn-warning" onclick="runWorkflow(9)" style="justify-content:flex-start;">
-            <span>&#9654;</span> Meta Title Optimization
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Runs -->
+  <div class="grid-2 mb-24">
     <div class="card">
-      <div class="card-header">
-        <h3>Recent Workflow Runs</h3>
-      </div>
-      <div class="card-body" style="padding:0;">
-        <table class="runs-table">
-          <thead>
-            <tr>
-              <th>Workflow</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody id="recent-runs-body">
-            <tr><td colspan="4" style="text-align:center; padding:24px; color:var(--gray);">No runs yet. Click "Run Now" to start.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ WORKFLOWS TAB ═══ -->
-  <div id="tab-workflows" class="tab-content">
-    <div class="section-header mb-16">
-      <h2>14 Marketing Workflows</h2>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <span class="workflow-badge badge-automated" style="position:static;">Automated (2)</span>
-        <span class="workflow-badge badge-on-demand" style="position:static;">On-Demand (6)</span>
-        <span class="workflow-badge badge-weekly" style="position:static;">Weekly (3)</span>
-        <span class="workflow-badge badge-monthly" style="position:static;">Monthly (2)</span>
-        <span class="workflow-badge badge-conditional" style="position:static;">Conditional (1)</span>
-      </div>
-    </div>
-    <div class="workflow-grid" id="workflows-grid"></div>
-  </div>
-
-  <!-- ═══ ARTICLES TAB ═══ -->
-  <div id="tab-articles" class="tab-content">
-    <div class="section-header mb-16">
-      <h2>Blog Articles</h2>
-      <span id="articles-count" style="color:var(--gray); font-size:13px;">Loading...</span>
-    </div>
-
-    <!-- Progress here too -->
-    <div class="card mb-24">
-      <div class="card-header"><h3>Optimization Status</h3></div>
+      <div class="card-header"><h3>Content Calendar</h3></div>
       <div class="card-body">
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" id="progress-fill-2" style="width:0%;">0%</div>
-        </div>
-        <div style="display:flex; gap:24px; margin-top:12px;">
-          <div><span class="opt-yes">&#10004;</span> Optimized: <strong id="art-opt-count">--</strong></div>
-          <div><span class="opt-no">&#10008;</span> Pending: <strong id="art-pend-count">--</strong></div>
+        <div class="calendar-grid">
+          <div class="cal-day" style="background:rgba(35,66,214,.06)"><div class="day-name" style="color:var(--blue)">Mon</div><div class="day-topic">Feeding & Milestone Guide</div></div>
+          <div class="cal-day" style="background:rgba(46,125,50,.06)"><div class="day-name" style="color:var(--green)">Tue</div><div class="day-topic">Product Comparison</div></div>
+          <div class="cal-day" style="background:rgba(230,81,0,.06)"><div class="day-name" style="color:var(--orange)">Wed</div><div class="day-topic">Seasonal / Topical</div></div>
+          <div class="cal-day" style="background:rgba(13,148,136,.06)"><div class="day-name" style="color:var(--teal)">Thu</div><div class="day-topic">Parenting Tips</div></div>
+          <div class="cal-day" style="background:rgba(30,64,175,.06)"><div class="day-name" style="color:var(--blue-deep)">Fri</div><div class="day-topic">Product Deep-Dive</div></div>
+          <div class="cal-day" style="background:rgba(224,32,47,.06)"><div class="day-name" style="color:var(--red)">Sat</div><div class="day-topic">Myth-Busting</div></div>
+          <div class="cal-day" style="background:rgba(124,58,237,.06)"><div class="day-name" style="color:var(--purple)">Sun</div><div class="day-topic">Gift Guide & Bundles</div></div>
         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-body" style="padding:0; overflow-x:auto;">
-        <table class="articles-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Title</th>
-              <th>Tags</th>
-              <th>Optimized?</th>
-              <th>Published</th>
-            </tr>
-          </thead>
-          <tbody id="articles-body">
-            <tr><td colspan="5" style="text-align:center; padding:24px; color:var(--gray);">Loading articles from Shopify...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ PRODUCTS TAB ═══ -->
-  <div id="tab-products" class="tab-content">
-    <div class="section-header mb-16">
-      <h2>Product Catalog — Internal Linking Assets</h2>
-      <span style="color:var(--gray); font-size:13px;">11 SKUs</span>
-    </div>
-    <div class="products-grid" id="products-grid"></div>
-
-    <!-- Linking Strategy -->
-    <div class="card" style="margin-top:24px;">
-      <div class="card-header"><h3>Content-to-Product Linking Strategy</h3></div>
-      <div class="card-body">
-        <table class="articles-table">
-          <thead>
-            <tr>
-              <th>Content Topic</th>
-              <th>Recommended Products</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>Bottle Feeding Articles</td><td>Anti-Colic Bottle, Multi-Purpose Bottle</td></tr>
-            <tr><td>Cleaning / Sterilisation</td><td>360° Bottle Brush Kit</td></tr>
-            <tr><td>Teething Content</td><td>Dinosaur Teether</td></tr>
-            <tr><td>Weaning / First Foods</td><td>Silicone Spoon Feeder</td></tr>
-            <tr><td>Gift Guides / Baby Showers</td><td>Baby Feeding Set, 4-in-1 Feeding Set</td></tr>
-            <tr><td>Bundle / Value Posts</td><td>EasyFeed Combo, Feed & Teethe Combo, Complete Kit</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ HISTORY TAB ═══ -->
-  <div id="tab-history" class="tab-content">
-    <div class="section-header mb-16">
-      <h2>Workflow Run History</h2>
-      <button class="btn btn-outline btn-sm" onclick="loadRuns()">Refresh</button>
     </div>
     <div class="card">
-      <div class="card-body" style="padding:0; overflow-x:auto;">
-        <table class="runs-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Workflow</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Triggered At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="history-body">
-            <tr><td colspan="6" style="text-align:center; padding:24px; color:var(--gray);">No runs yet.</td></tr>
-          </tbody>
-        </table>
+      <div class="card-header"><h3>Quick Launch</h3></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-run magnetic" onclick="runWorkflow(1)"><span>&#9654;</span> <span>Content Refresh Agent</span></button>
+        <button class="btn btn-run magnetic" onclick="runWorkflow(2)"><span>&#9654;</span> <span>Blog Revamp Workflow</span></button>
+        <button class="btn btn-run magnetic" onclick="runWorkflow(6)"><span>&#9654;</span> <span>Competitor Page Generator</span></button>
+        <button class="btn btn-run magnetic" onclick="runWorkflow(5)"><span>&#9654;</span> <span>Listicle Article Generator</span></button>
+        <button class="btn btn-run magnetic" onclick="runWorkflow(10)"><span>&#9654;</span> <span>Weekly Performance Report</span></button>
+        <button class="btn btn-run magnetic" onclick="runWorkflow(9)"><span>&#9654;</span> <span>Meta Title Optimization</span></button>
       </div>
     </div>
   </div>
+
+  <div class="marquee"><div class="marquee-track"><span>SEO</span><span class="hl">&#9733;</span><span>AEO</span><span class="hl">&#9733;</span><span>E-E-A-T</span><span class="hl">&#9733;</span><span>ORGANIC GROWTH</span><span class="hl">&#9733;</span><span>HYPERSCALE</span><span class="hl">&#9733;</span><span>SEO</span><span class="hl">&#9733;</span><span>AEO</span><span class="hl">&#9733;</span><span>E-E-A-T</span><span class="hl">&#9733;</span><span>ORGANIC GROWTH</span><span class="hl">&#9733;</span><span>HYPERSCALE</span><span class="hl">&#9733;</span></div></div>
+
+  <div class="card">
+    <div class="card-header"><h3>Recent Runs</h3></div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table><thead><tr><th>Workflow</th><th>Category</th><th>Status</th><th>Time</th></tr></thead>
+      <tbody id="recent-runs-body"><tr><td colspan="4" style="text-align:center;padding:28px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:12px">No runs yet — click RUN NOW to start the engine</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WORKFLOWS ═══ -->
+<div id="tab-workflows" class="tab-content">
+  <div class="section-header">
+    <h2>14 Marketing Workflows</h2>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="wf-badge badge-automated" style="position:static;border:2px solid var(--ink);border-radius:8px;padding:4px 10px">Automated (2)</span>
+      <span class="wf-badge badge-on-demand" style="position:static;border:2px solid var(--ink);border-radius:8px;padding:4px 10px">On-Demand (6)</span>
+      <span class="wf-badge badge-weekly" style="position:static;border:2px solid var(--ink);border-radius:8px;padding:4px 10px">Weekly (3)</span>
+      <span class="wf-badge badge-monthly" style="position:static;border:2px solid var(--ink);border-radius:8px;padding:4px 10px">Monthly (2)</span>
+      <span class="wf-badge badge-conditional" style="position:static;border:2px solid var(--ink);border-radius:8px;padding:4px 10px">Conditional (1)</span>
+    </div>
+  </div>
+  <div class="workflow-grid" id="workflows-grid"></div>
+</div>
+
+<!-- ═══ ARTICLES ═══ -->
+<div id="tab-articles" class="tab-content">
+  <div class="section-header"><h2>Blog Articles</h2><span id="articles-count" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft)">51 articles</span></div>
+  <div class="card mb-24">
+    <div class="card-header"><h3>Optimization Status</h3></div>
+    <div class="card-body">
+      <div class="progress-container"><div class="progress-fill" id="progress-fill-2" style="width:12%">6 / 51</div></div>
+      <div style="display:flex;gap:24px;margin-top:12px;font-size:13px"><div><span class="opt-yes">YES</span> Optimized: <strong id="art-opt">6</strong></div><div><span class="opt-no">NO</span> Pending: <strong id="art-pend">45</strong></div></div>
+    </div>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Title</th><th>Tags</th><th>Status</th><th>Published</th></tr></thead><tbody id="articles-body"></tbody></table></div>
+</div>
+
+<!-- ═══ PRODUCTS ═══ -->
+<div id="tab-products" class="tab-content">
+  <div class="section-header"><h2>Product Catalog</h2><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft)">11 SKUs — Internal Linking Assets</span></div>
+  <div class="products-grid" id="products-grid"></div>
+  <div class="card" style="margin-top:24px">
+    <div class="card-header"><h3>Content-to-Product Linking Strategy</h3></div>
+    <div class="card-body" style="padding:0"><table><thead><tr><th>Content Topic</th><th>Link These Products</th></tr></thead><tbody>
+      <tr><td>Bottle Feeding</td><td>Anti-Colic Bottle, Multi-Purpose Bottle</td></tr>
+      <tr><td>Cleaning & Sterilisation</td><td>360° Bottle Brush Kit</td></tr>
+      <tr><td>Teething</td><td>Dinosaur Teether</td></tr>
+      <tr><td>Weaning & First Foods</td><td>Silicone Spoon Feeder</td></tr>
+      <tr><td>Gift Guides</td><td>Baby Feeding Set, 4-in-1 Feeding Set</td></tr>
+      <tr><td>Bundle & Value</td><td>EasyFeed Combo, Feed & Teethe Combo, Complete Kit</td></tr>
+    </tbody></table></div>
+  </div>
+</div>
+
+<!-- ═══ KNOWLEDGE HUB ═══ -->
+<div id="tab-knowledge" class="tab-content">
+
+  <div class="knowledge-section">
+    <div class="eyebrow">01 — The Mission</div>
+    <h2>Why We're <span class="accent">Building This</span></h2>
+    <div class="knowledge-card">
+      <h3>The Problem</h3>
+      <p>Nibbles makes the safest baby feeding products in India — LFGB + FDA + NABL certified silicone. But Indian parents searching "best baby bottle India" find plastic brands with bigger ad budgets, not the safest option. <b>Organic content is the equalizer.</b></p>
+      <div class="why-box">"When you can't outspend, you out-content. Every optimized blog is a free sales rep working 24/7."</div>
+    </div>
+    <div class="knowledge-card">
+      <h3>The Solution: Automated Organic Growth Engine</h3>
+      <p>Instead of manually writing blogs, we built a <b>fully automated marketing engine</b> that:</p>
+      <ul>
+        <li><b>Updates 3 existing articles daily</b> — turning thin content into ranking machines</li>
+        <li><b>Creates 1 new article daily</b> — expanding keyword coverage every single day</li>
+        <li><b>Uses E-E-A-T methodology</b> — Google's own quality framework, baked into every article</li>
+        <li><b>Targets Indian parents specifically</b> — local context, INR pricing, Indian certifications</li>
+        <li><b>Runs on autopilot</b> — Claude Scheduled Task fires at 7:30 AM IST, zero manual work</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="marquee m2"><div class="marquee-track"><span>BUILD</span><span>&#183;</span><span>OPTIMIZE</span><span>&#183;</span><span>PUBLISH</span><span>&#183;</span><span>RANK</span><span>&#183;</span><span>CONVERT</span><span>&#183;</span><span>REPEAT</span><span>&#183;</span><span>BUILD</span><span>&#183;</span><span>OPTIMIZE</span><span>&#183;</span><span>PUBLISH</span><span>&#183;</span><span>RANK</span><span>&#183;</span><span>CONVERT</span><span>&#183;</span><span>REPEAT</span><span>&#183;</span></div></div>
+
+  <div class="knowledge-section" style="margin-top:30px">
+    <div class="eyebrow">02 — How It Works</div>
+    <h2>The Daily <span class="accent-b">Execution Flow</span></h2>
+    <div class="knowledge-grid">
+      <div class="step-card"><div class="step-num">01</div><h4>Fetch All Articles</h4><p>GraphQL pulls every article from Shopify. We analyze titles, tags, body content, and structure.</p></div>
+      <div class="step-card"><div class="step-num">02</div><h4>Identify Weakest</h4><p>Algorithm finds the 3 oldest articles missing: Key Takeaways, FAQ, product links, proper tags, comparison tables.</p></div>
+      <div class="step-card"><div class="step-num">03</div><h4>Rewrite with E-E-A-T</h4><p>Full rewrite: SEO title, Key Takeaways box, expert content, product images, comparison tables, FAQ section.</p></div>
+      <div class="step-card"><div class="step-num">04</div><h4>Create New Post</h4><p>1 new article targeting high-volume search queries. Topic rotates daily: feeding guides, comparisons, seasonal, gift guides.</p></div>
+      <div class="step-card"><div class="step-num">05</div><h4>Publish & Index</h4><p>Push to Shopify via GraphQL mutations. Redirect old URLs. Update publish date for freshness signal.</p></div>
+      <div class="step-card"><div class="step-num">06</div><h4>Report & Queue</h4><p>Summary of changes + next 3 articles queued for tomorrow. The cycle never stops.</p></div>
+    </div>
+  </div>
+
+  <div class="knowledge-section" style="margin-top:30px">
+    <div class="eyebrow">03 — Tag Strategy</div>
+    <h2>Smart Tags for <span class="accent">Maximum Reach</span></h2>
+    <div class="knowledge-card">
+      <h3>Why Not Just "India 2026" on Everything?</h3>
+      <p>Generic tags like "India 2026" on every article is a wasted opportunity. Each article should have <b>unique, intent-driven tags</b> that match what real parents search for. Here's our actual strategy:</p>
+      <ul>
+        <li><b>Primary keyword tag</b> — The main search term ("anti colic bottle for newborn")</li>
+        <li><b>Problem/solution tags</b> — What parents are worried about ("baby gas relief", "colic remedies")</li>
+        <li><b>Age-based tags</b> — Target specific stages ("0-3 month feeding", "6 month weaning")</li>
+        <li><b>Product category tags</b> — Connect to collection pages ("silicone bottle", "baby teether")</li>
+        <li><b>Long-tail question tags</b> — Voice search targets ("how to sterilize baby bottles", "best bottle for breastfed baby")</li>
+        <li><b>Certification tags</b> — Trust signals ("BPA free", "LFGB certified", "food grade silicone")</li>
+        <li><b>1-2 location tags</b> — Just enough for local SEO ("India", "Indian parents")</li>
+        <li><b>Seasonal tags when relevant</b> — Timely content ("monsoon baby care", "summer feeding tips")</li>
+      </ul>
+      <div class="why-box">10-12 unique, search-intent tags per article > 10 generic tags repeated everywhere</div>
+    </div>
+  </div>
+
+  <div class="knowledge-section" style="margin-top:30px">
+    <div class="eyebrow">04 — E-E-A-T Explained</div>
+    <h2>Google's <span class="accent-b">Quality Framework</span></h2>
+    <div class="knowledge-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      <div class="knowledge-card">
+        <h3 style="color:var(--green)">Experience</h3>
+        <p>Content reflects <b>real Indian parenting</b> — monsoon sterilisation challenges, joint family dynamics, boiling as primary sterilisation method, local city references.</p>
+      </div>
+      <div class="knowledge-card">
+        <h3 style="color:var(--blue)">Expertise</h3>
+        <p><b>Paediatrician-backed advice</b>, developmental milestones, feeding schedules by age, certification details (LFGB, FDA, NABL, BIS).</p>
+      </div>
+      <div class="knowledge-card">
+        <h3 style="color:var(--purple)">Authoritativeness</h3>
+        <p><b>Data-driven content</b> — comparison tables, statistics, structured FAQ sections, product specifications, internal cross-linking.</p>
+      </div>
+      <div class="knowledge-card">
+        <h3 style="color:var(--orange)">Trustworthiness</h3>
+        <p><b>Honest product comparisons</b> (silicone vs plastic vs steel), full certification transparency, no exaggerated health claims.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="knowledge-section" style="margin-top:30px">
+    <div class="eyebrow">05 — Article Anatomy</div>
+    <h2>Every Article <span class="accent">Must Have</span></h2>
+    <div class="knowledge-card">
+      <h3>Mandatory Structure (Non-Negotiable)</h3>
+      <ul>
+        <li><b>H1 Title</b> — Primary keyword + contextual location + current year</li>
+        <li><b>Key Takeaways Box</b> — Styled div, 4-5 bullet points, immediately after H1</li>
+        <li><b>Introduction</b> — Primary keyword in first 100 words</li>
+        <li><b>H2 > H3 Sections</b> — Proper hierarchy, never skip levels</li>
+        <li><b>Product Images + Links</b> — 3+ internal product links with title attributes</li>
+        <li><b>Comparison Tables</b> — At least 1 for rich snippet eligibility</li>
+        <li><b>FAQ Section</b> — 5-6 questions, 40-60 word answers, targets voice search</li>
+        <li><b>Author: Team Nibbles</b> — Always</li>
+        <li><b>Publish Date: Today</b> — Freshness signal for Google</li>
+        <li><b>10-12 Unique Tags</b> — Intent-driven, not generic</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HISTORY ═══ -->
+<div id="tab-history" class="tab-content">
+  <div class="section-header"><h2>Run History</h2><button class="btn btn-ghost" onclick="loadRuns()">Refresh</button></div>
+  <div class="table-wrap"><table><thead><tr><th>ID</th><th>Workflow</th><th>Category</th><th>Status</th><th>Time</th><th>Action</th></tr></thead><tbody id="history-body"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:12px">No runs yet</td></tr></tbody></table></div>
+</div>
 
 </main>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <div class="modal-header">
-      <h3 id="modal-title">Workflow Prompt</h3>
-      <button class="modal-close" onclick="closeModal()">&#10005;</button>
-    </div>
+    <div class="modal-header"><h3 id="modal-title">Workflow</h3><button class="modal-close" onclick="closeModal()">&#10005;</button></div>
     <div class="modal-body">
-      <p style="margin-bottom:12px; font-size:13px; color:var(--gray);">Copy this prompt and paste it into your Claude Code session to execute:</p>
-      <div class="prompt-box" id="modal-prompt">
-        <button class="copy-btn" onclick="copyPrompt()">Copy</button>
-        <span id="prompt-text"></span>
-      </div>
+      <p style="margin-bottom:12px;font-size:13px;color:var(--ink-soft)">Copy this prompt into Claude Code to execute:</p>
+      <div class="prompt-box" id="modal-prompt"><button class="copy-btn" onclick="copyPrompt()">COPY</button><span id="prompt-text"></span></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal()">Close</button>
-      <button class="btn btn-primary" onclick="copyPrompt()">Copy Prompt</button>
+      <button class="btn btn-ghost" onclick="closeModal()"><span>Close</span></button>
+      <button class="btn btn-run" onclick="copyPrompt()"><span>Copy Prompt</span></button>
     </div>
   </div>
 </div>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
-  // ─── State ───
-  let dashboardData = null;
+gsap.registerPlugin(ScrollTrigger);
+let D=null;
 
-  // ─── Init ───
-  async function init() {
-    const res = await fetch('/api/dashboard');
-    dashboardData = await res.json();
-    renderOverview();
-    renderWorkflows();
-    renderArticles();
-    renderProducts();
+// ─── Scroll progress ───
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  const p=h.scrollTop/(h.scrollHeight-h.clientHeight);
+  document.getElementById('progFill').style.width=p*100+'%';
+},{passive:true});
+
+// ─── Tabs ───
+document.querySelectorAll('.nav-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+// ─── Init ───
+async function init(){
+  const res=await fetch('/api/dashboard');
+  D=await res.json();
+  renderOverview();
+  renderWorkflows();
+  renderArticles();
+  renderProducts();
+  initAnimations();
+}
+
+// ─── Overview ───
+function renderOverview(){
+  if(!D)return;
+  const s=D.stats;
+  document.getElementById('stat-total').textContent=s.totalArticles;
+  document.getElementById('stat-optimized').textContent=s.optimizedArticles;
+  document.getElementById('stat-remaining').textContent=s.remainingArticles;
+  document.getElementById('stat-days').textContent='~'+s.daysToComplete;
+  const pct=Math.round((s.optimizedArticles/s.totalArticles)*100);
+  document.getElementById('progress-pct').textContent=pct+'%';
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-fill').textContent=s.optimizedArticles+' / '+s.totalArticles;
+  document.getElementById('next-run').textContent=fmtDate(D.scheduledTask.nextRun);
+  document.getElementById('last-run').textContent=fmtDate(D.scheduledTask.lastRun);
+  renderRecentRuns();
+}
+
+// ─── Workflows ───
+function renderWorkflows(){
+  if(!D)return;
+  const g=document.getElementById('workflows-grid');
+  g.innerHTML=D.workflows.map(wf=>{
+    const bc={'AUTOMATED':'badge-automated','ON-DEMAND':'badge-on-demand','WEEKLY':'badge-weekly','MONTHLY':'badge-monthly','CONDITIONAL':'badge-conditional'}[wf.category]||'badge-on-demand';
+    return`<div class="workflow-card tilt-card"><div class="wf-num" style="background:${wf.color}">${wf.id}</div><div class="wf-content"><h4>${wf.name}</h4><p>${wf.desc}</p><div class="wf-actions"><button class="btn btn-run magnetic" onclick="runWorkflow(${wf.id})"><span>&#9654; Run</span></button><button class="btn btn-ghost" onclick="viewPrompt(${wf.id})"><span>View Prompt</span></button></div></div><span class="wf-badge ${bc}">${wf.category}</span></div>`;
+  }).join('');
+}
+
+// ─── Articles ───
+function renderArticles(){
+  const articles=[
+    {title:"Best Anti-Colic Bottles India 2026",tags:["anti colic bottle newborn","silicone baby bottle","BPA free bottle India","colic remedies baby","best feeding bottle 2026"],opt:true,date:"2026-06-11"},
+    {title:"Silicone vs Plastic Baby Bottles India 2026",tags:["silicone vs plastic bottle","safe baby bottle material","BPA free baby products","chemical free feeding","LFGB certified bottle"],opt:true,date:"2026-06-11"},
+    {title:"When to Start Spoon Feeding Baby India 2026",tags:["when to start solids","baby weaning age","spoon feeding tips","6 month baby food","first foods India"],opt:true,date:"2026-06-11"},
+    {title:"How to Bottle Feed Newborn Baby India 2026",tags:["bottle feeding newborn","newborn feeding guide","formula feeding tips","sterilise baby bottles","anti colic feeding"],opt:true,date:"2026-06-11"},
+    {title:"Paced Bottle Feeding India Guide 2026",tags:["paced bottle feeding","combination feeding","nipple confusion prevention","breastfed baby bottle","slow flow nipple"],opt:true,date:"2026-06-11"},
+    {title:"How to Take Care of Baby First Month India 2026",tags:["newborn care first month","baby bathing tips","umbilical cord care","newborn sleep position","postpartum guide India"],opt:true,date:"2026-06-11"},
+    {title:"Monsoon Baby Care India 2026 (NEW)",tags:["monsoon baby care","rainy season baby safety","baby hygiene monsoon","waterborne disease prevention","baby skin care humidity"],opt:true,date:"2026-06-11"},
+    {title:"How to Develop Curiosity in Children Using Sensory Toys",tags:["Sensory Toys","Child Development"],opt:false,date:"2025-06-27"},
+    {title:"Hidden Toxins in Baby Toys",tags:["baby safety","BPA free"],opt:false,date:"2025-06-27"},
+    {title:"How to Sterilize Baby Bottles at Home",tags:["sterilization","hygiene"],opt:false,date:"2025-06-29"},
+    {title:"Choosing the Perfect Baby Bottle Nipple",tags:["Baby Bottle Nipple"],opt:false,date:"2025-06-30"},
+    {title:"Why Clean Air Matters for Baby's Growth",tags:["clean air","baby health"],opt:false,date:"2025-07-01"},
+    {title:"How to Teach Your Baby to Focus",tags:["baby focus","development"],opt:false,date:"2025-07-01"},
+    {title:"How to Talk to Your Baby for Brain Development",tags:["language","brain"],opt:false,date:"2025-07-02"},
+    {title:"Managing Rest & Personal Time for Mothers",tags:["motherhood","self-care"],opt:false,date:"2025-07-03"},
+    {title:"15 Beautiful Experiences Before First Birthday",tags:["milestones","baby care"],opt:false,date:"2025-07-05"},
+    {title:"9 Ways to Encourage Baby to Walk",tags:["walking","milestones"],opt:false,date:"2025-07-06"},
+    {title:"Essential Growth Nutrients for Indian Babies",tags:["nutrition","baby food"],opt:false,date:"2025-07-07"},
+    {title:"Are Steel Feeder Bottles Safe?",tags:["steel bottles"],opt:false,date:"2025-07-08"},
+    {title:"7 Things Parents Often Forget",tags:["parenting tips"],opt:false,date:"2025-07-09"},
+    {title:"Best Baby Feeding Spoon in India",tags:["feeding spoon"],opt:false,date:"2025-07-10"},
+    {title:"The Best Ways to Bottle Feed Your Baby",tags:[],opt:false,date:"2025-07-12"},
+    {title:"10 Baby Items You Must Sterilize Daily",tags:["sterilization"],opt:false,date:"2025-07-14"},
+    {title:"Top 5 Baby Feeding Bottles in India 2025",tags:[],opt:false,date:"2025-07-16"},
+    {title:"How to Use Milk Formula for Your Baby",tags:["formula","feeding"],opt:false,date:"2025-07-16"},
+    {title:"Types of Baby Bottles: Why Silicone Outshines",tags:["silicone","bottles"],opt:false,date:"2025-07-18"},
+    {title:"How to Choose Replacement Nipples",tags:["nipples"],opt:false,date:"2025-07-20"},
+    {title:"Best Baby Feeding Bottles India — Buy Online",tags:["buy online"],opt:false,date:"2025-07-21"},
+    {title:"The Only Guide to Choose Milk Bottle for Newborn",tags:["milk bottle"],opt:false,date:"2025-07-23"},
+    {title:"How Long Should a Bottle and Nipple Last?",tags:["bottle care"],opt:false,date:"2025-07-24"},
+    {title:"The Science Behind Our Bottle Design",tags:["anti-colic"],opt:false,date:"2025-07-28"},
+    {title:"Before the Baby Arrives: What to Know",tags:["pregnancy"],opt:false,date:"2025-07-29"},
+    {title:"Vitamin & Nutrient Guide for Babies",tags:["vitamins"],opt:false,date:"2025-07-30"},
+    {title:"6 Foods That Power Baby's Brain & Body",tags:["brain food"],opt:false,date:"2025-08-01"},
+    {title:"11 Nutrient-Rich Foods for Healthy Pregnancy",tags:["pregnancy diet"],opt:false,date:"2025-08-04"},
+    {title:"Baby Feeding Schedule by Age",tags:["feeding schedule"],opt:false,date:"2025-08-08"},
+    {title:"How to Check if Baby is Allergic to Food",tags:[],opt:false,date:"2025-08-08"},
+    {title:"Milk Bottle for Newborn: Ultimate Guide",tags:[],opt:false,date:"2025-08-08"},
+    {title:"Baby Vomiting Help: What to Do",tags:["vomiting"],opt:false,date:"2025-08-12"},
+    {title:"When Baby Refuses Breast Milk",tags:["breastfeeding"],opt:false,date:"2025-08-13"},
+    {title:"Lactation Problems Solutions",tags:["lactation"],opt:false,date:"2025-08-16"},
+    {title:"Everything About Bottle Feeding for Mothers",tags:["bottle guide"],opt:false,date:"2025-08-19"},
+    {title:"Being a Parent is Amazing",tags:["parenthood"],opt:false,date:"2025-08-20"},
+    {title:"How Baby Communicates",tags:["baby cues"],opt:false,date:"2025-08-22"},
+    {title:"Working Parent Tips",tags:["work-life"],opt:false,date:"2025-08-24"},
+    {title:"What to Expect from Daycare in Indian Metros",tags:["daycare"],opt:false,date:"2025-08-26"},
+    {title:"Why a High-Quality Bottle Is a Must-Buy",tags:["premium bottle"],opt:false,date:"2025-10-24"},
+    {title:"Silicone Feeding Bottle: Why Upgrade Now",tags:["upgrade"],opt:false,date:"2025-10-28"},
+    {title:"Do I Need to Sterilize Baby Bottles?",tags:["sterilization"],opt:false,date:"2025-11-15"},
+    {title:"Baby Teeth and Bottle Nipple Shape",tags:["dental health"],opt:false,date:"2025-11-15"},
+    {title:"Wide-Neck vs Narrow-Neck Bottles",tags:["bottle comparison"],opt:false,date:"2025-11-16"},
+  ];
+  const oc=articles.filter(a=>a.opt).length,pc=articles.length-oc;
+  document.getElementById('art-opt').textContent=oc;
+  document.getElementById('art-pend').textContent=pc;
+  const pct2=Math.round(oc/articles.length*100);
+  document.getElementById('progress-fill-2').style.width=pct2+'%';
+  document.getElementById('progress-fill-2').textContent=oc+' / '+articles.length;
+  document.getElementById('articles-body').innerHTML=articles.map((a,i)=>`<tr><td>${i+1}</td><td style="max-width:340px;font-weight:600">${a.title}</td><td style="max-width:250px">${a.tags.slice(0,3).map(t=>'<span class="tag-chip">'+t+'</span>').join('')}${a.tags.length>3?'<span class="tag-chip">+'+(a.tags.length-3)+'</span>':''}</td><td><span class="${a.opt?'opt-yes':'opt-no'}">${a.opt?'DONE':'PENDING'}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${a.date}</td></tr>`).join('');
+}
+
+// ─── Products ───
+function renderProducts(){
+  if(!D)return;
+  document.getElementById('products-grid').innerHTML=D.products.map(p=>`<div class="product-card tilt-card"><div class="product-cat">${p.category}</div><h4>${p.name}</h4><div class="product-price">Rs.${p.price.toLocaleString('en-IN')}</div><div class="product-handle">${p.handle}</div><a href="https://thenibbles.shop/products/${p.handle}" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-top:10px"><span>View &#8599;</span></a></div>`).join('');
+}
+
+// ─── Actions ───
+async function runDailyEngine(){
+  const res=await fetch('/api/daily-engine/run',{method:'POST'});
+  const data=await res.json();
+  showModal('Daily Blog Engine — Run Now',data.run.prompt);
+  renderRecentRuns();
+  showToast('Daily Engine triggered!');
+}
+async function runWorkflow(id){
+  const res=await fetch('/api/workflows/'+id+'/run',{method:'POST'});
+  const data=await res.json();
+  showModal(data.run.workflowName,data.run.prompt);
+  renderRecentRuns();
+  showToast(data.run.workflowName+' triggered!');
+}
+function viewPrompt(id){const wf=D.workflows.find(w=>w.id===id);if(wf)showModal(wf.name,wf.prompt);}
+async function renderRecentRuns(){
+  const res=await fetch('/api/runs');const runs=await res.json();
+  const tb=document.getElementById('recent-runs-body');
+  const hb=document.getElementById('history-body');
+  if(!runs.length){
+    tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:28px;color:var(--ink-soft);font-family:\'JetBrains Mono\',monospace;font-size:12px">No runs yet — click RUN NOW</td></tr>';
+    hb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--ink-soft)">No runs yet</td></tr>';
+    return;
   }
+  tb.innerHTML=runs.slice(0,5).map(r=>`<tr><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase().replace(/-/g,'-')}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span class="wf-badge" style="position:static;background:${r.status==='completed'?'var(--green-bg)':'#fef3c7'};color:${r.status==='completed'?'var(--green)':'#92400e'};border-radius:6px;padding:2px 8px;border:1px solid var(--line)">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td></tr>`).join('');
+  hb.innerHTML=runs.map(r=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft)">${r.id.slice(0,14)}</td><td><strong>${r.workflowName}</strong></td><td><span class="wf-badge badge-${r.category.toLowerCase()}" style="position:static;border:1px solid var(--line);border-radius:6px;padding:2px 8px">${r.category}</span></td><td><span class="wf-badge" style="position:static;background:${r.status==='completed'?'var(--green-bg)':'#fef3c7'};color:${r.status==='completed'?'var(--green)':'#92400e'};border-radius:6px;padding:2px 8px;border:1px solid var(--line)">${r.status}</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)">${fmtDate(r.timestamp)}</td><td><button class="btn btn-ghost" onclick="markDone('${r.id}')"><span>Done</span></button></td></tr>`).join('');
+}
+async function markDone(id){await fetch('/api/runs/'+id+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'completed'})});renderRecentRuns();showToast('Marked complete!');}
+async function loadRuns(){renderRecentRuns();}
 
-  // ─── Tab Navigation ───
-  document.querySelectorAll('.nav-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+// ─── Modal ───
+function showModal(t,p){document.getElementById('modal-title').textContent=t;document.getElementById('prompt-text').textContent=p;document.getElementById('modal').classList.add('active');}
+function closeModal(){document.getElementById('modal').classList.remove('active');}
+function copyPrompt(){navigator.clipboard.writeText(document.getElementById('prompt-text').textContent).then(()=>showToast('Copied to clipboard!'));}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// ─── Toast ───
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ─── Format ───
+function fmtDate(iso){if(!iso)return'--';const d=new Date(iso);return d.toLocaleDateString('en-IN',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});}
+
+// ─── GSAP Animations ───
+function initAnimations(){
+  // Stat cards entrance
+  gsap.from('.stat-card',{y:40,opacity:0,duration:.8,stagger:.1,ease:'back.out(1.6)',scrollTrigger:{trigger:'.stats-grid',start:'top 90%'}});
+  // Workflow cards
+  gsap.from('.workflow-card',{y:50,opacity:0,rotateX:-15,duration:.9,stagger:.08,ease:'back.out(1.4)',scrollTrigger:{trigger:'.workflow-grid',start:'top 90%'}});
+  // Knowledge cards
+  gsap.from('.knowledge-card',{y:50,opacity:0,duration:.8,stagger:.12,ease:'power3.out',scrollTrigger:{trigger:'.knowledge-card',start:'top 90%'}});
+  gsap.from('.step-card',{y:40,opacity:0,duration:.7,stagger:.1,ease:'back.out(1.5)',scrollTrigger:{trigger:'.knowledge-grid',start:'top 90%'}});
+  // Product cards
+  gsap.from('.product-card',{y:30,opacity:0,scale:.95,duration:.7,stagger:.06,ease:'back.out(1.4)',scrollTrigger:{trigger:'.products-grid',start:'top 90%'}});
+
+  // 3D tilt on cards
+  document.querySelectorAll('.tilt-card,.card').forEach(card=>{
+    card.addEventListener('pointermove',e=>{
+      const r=card.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;
+      card.style.setProperty('--mx',px*100+'%');card.style.setProperty('--my',py*100+'%');
+      gsap.to(card,{rotateY:(px-.5)*10,rotateX:(.5-py)*10,duration:.4,ease:'power2.out',transformPerspective:800});
     });
+    card.addEventListener('pointerleave',()=>{gsap.to(card,{rotateX:0,rotateY:0,duration:.6,ease:'elastic.out(1,.5)'});});
   });
 
-  // ─── Render Overview ───
-  function renderOverview() {
-    if (!dashboardData) return;
-    const s = dashboardData.stats;
-
-    document.getElementById('stat-total').textContent = s.totalArticles;
-    document.getElementById('stat-optimized').textContent = s.optimizedArticles;
-    document.getElementById('stat-remaining').textContent = s.remainingArticles;
-    document.getElementById('stat-days').textContent = '~' + s.daysToComplete;
-
-    const pct = Math.round((s.optimizedArticles / s.totalArticles) * 100);
-    document.getElementById('progress-pct').textContent = pct + '%';
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-fill').textContent = `${s.optimizedArticles} / ${s.totalArticles}`;
-    document.getElementById('progress-total').textContent = s.totalArticles + ' articles';
-
-    // Schedule info
-    const task = dashboardData.scheduledTask;
-    document.getElementById('next-run').textContent = formatDate(task.nextRun);
-    document.getElementById('last-run').textContent = formatDate(task.lastRun);
-
-    renderRecentRuns();
-  }
-
-  // ─── Render Workflows ───
-  function renderWorkflows() {
-    if (!dashboardData) return;
-    const grid = document.getElementById('workflows-grid');
-    grid.innerHTML = dashboardData.workflows.map(wf => {
-      const badgeClass = {
-        'AUTOMATED': 'badge-automated',
-        'ON-DEMAND': 'badge-on-demand',
-        'WEEKLY': 'badge-weekly',
-        'MONTHLY': 'badge-monthly',
-        'CONDITIONAL': 'badge-conditional'
-      }[wf.category] || 'badge-on-demand';
-
-      return `
-        <div class="workflow-card">
-          <div class="workflow-num" style="background:${wf.color};">${wf.id}</div>
-          <div class="workflow-content">
-            <h4>${wf.name}</h4>
-            <p>${wf.desc}</p>
-            <div class="workflow-actions">
-              <button class="btn btn-primary btn-sm" onclick="runWorkflow(${wf.id})">&#9654; Run</button>
-              <button class="btn btn-outline btn-sm" onclick="viewPrompt(${wf.id})">View Prompt</button>
-            </div>
-          </div>
-          <span class="workflow-badge ${badgeClass}">${wf.category}</span>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // ─── Render Articles ───
-  function renderArticles() {
-    // Use hardcoded data from server for now
-    const articles = [
-      { title: "Best Anti-Colic Bottles India 2026", tags: ["India", "2026"], optimized: true, date: "2026-06-11" },
-      { title: "Silicone vs Plastic Baby Bottles India 2026", tags: ["India", "2026"], optimized: true, date: "2026-06-11" },
-      { title: "When to Start Spoon Feeding Baby India 2026", tags: ["India", "2026"], optimized: true, date: "2026-06-11" },
-      { title: "How to Bottle Feed Newborn Baby India 2026", tags: ["India", "2026"], optimized: true, date: "2026-06-11" },
-      { title: "Paced Bottle Feeding India Guide 2026", tags: ["India", "2026"], optimized: true, date: "2026-06-11" },
-      { title: "How to Take Care of Baby First Month India 2026", tags: ["India", "2026"], optimized: true, date: "2026-06-11" },
-      { title: "Monsoon Baby Care India 2026 (NEW)", tags: ["India", "2026"], optimized: true, date: "2026-06-11" },
-      { title: "How to Develop Curiosity in Children Using Sensory Toys", tags: ["Sensory Toys", "Child Development"], optimized: false, date: "2025-06-27" },
-      { title: "Hidden Toxins in Baby Toys", tags: ["baby safety", "BPA free"], optimized: false, date: "2025-06-27" },
-      { title: "How to Sterilize Baby Bottles at Home", tags: ["sterilization", "hygiene"], optimized: false, date: "2025-06-29" },
-      { title: "Choosing the Perfect Baby Bottle Nipple in India", tags: ["Baby Bottle Nipple"], optimized: false, date: "2025-06-30" },
-      { title: "Why Clean Air Matters for Baby's Growth", tags: ["clean air", "baby health"], optimized: false, date: "2025-07-01" },
-      { title: "How to Teach Your Baby to Focus", tags: ["baby focus", "development"], optimized: false, date: "2025-07-01" },
-      { title: "How to Talk to Your Baby for Brain Development", tags: ["language", "brain"], optimized: false, date: "2025-07-02" },
-      { title: "Managing Rest & Personal Time for Mothers", tags: ["motherhood", "self-care"], optimized: false, date: "2025-07-03" },
-      { title: "15 Beautiful Experiences Before First Birthday", tags: ["milestones", "baby care"], optimized: false, date: "2025-07-05" },
-      { title: "9 Ways to Encourage Baby to Walk", tags: ["walking", "milestones"], optimized: false, date: "2025-07-06" },
-      { title: "Essential Growth Nutrients for Indian Babies", tags: ["nutrition", "baby food"], optimized: false, date: "2025-07-07" },
-      { title: "Are Steel Feeder Bottles Safe for Indian Babies?", tags: ["steel bottles", "baby care"], optimized: false, date: "2025-07-08" },
-      { title: "7 Things Parents Often Forget While Raising a Baby", tags: ["parenting tips"], optimized: false, date: "2025-07-09" },
-      { title: "Best Baby Feeding Spoon in India", tags: ["feeding spoon", "Nibbles"], optimized: false, date: "2025-07-10" },
-      { title: "The Best Ways to Bottle Feed Your Baby", tags: [], optimized: false, date: "2025-07-12" },
-      { title: "10 Baby Items You Must Sterilize Daily", tags: ["sterilization"], optimized: false, date: "2025-07-14" },
-      { title: "Top 5 Baby Feeding Bottles in India 2025", tags: [], optimized: false, date: "2025-07-16" },
-      { title: "How to Use Milk Formula for Your Baby", tags: ["formula", "feeding"], optimized: false, date: "2025-07-16" },
-      { title: "Types of Baby Bottles: Why Silicone Outshines", tags: ["silicone", "baby bottles"], optimized: false, date: "2025-07-18" },
-      { title: "How to Choose Replacement Nipples", tags: ["nipples", "bottle care"], optimized: false, date: "2025-07-20" },
-      { title: "Best Baby Feeding Bottles in India — Buy Online", tags: ["baby bottle", "buy online"], optimized: false, date: "2025-07-21" },
-      { title: "The Only Guide to Choose Right Milk Bottle for Newborn", tags: ["milk bottle", "newborn"], optimized: false, date: "2025-07-23" },
-      { title: "How Long Should a Milk Bottle and Nipple Last?", tags: ["bottle care", "safety"], optimized: false, date: "2025-07-24" },
-      { title: "The Science Behind Our Bottle Design", tags: ["anti-colic", "ergonomic"], optimized: false, date: "2025-07-28" },
-      { title: "Before the Baby Arrives: What to Know", tags: ["pregnancy", "checklist"], optimized: false, date: "2025-07-29" },
-      { title: "Vitamin & Nutrient Guide for Babies", tags: ["vitamins", "nutrition"], optimized: false, date: "2025-07-30" },
-      { title: "6 Foods That Power Baby's Brain & Body", tags: ["baby food", "brain development"], optimized: false, date: "2025-08-01" },
-      { title: "11 Nutrient-Rich Foods for Healthy Pregnancy", tags: ["pregnancy", "diet"], optimized: false, date: "2025-08-04" },
-      { title: "Baby Feeding Schedule by Age", tags: ["feeding schedule", "routine"], optimized: false, date: "2025-08-08" },
-      { title: "How to Check if Baby is Allergic to Food", tags: [], optimized: false, date: "2025-08-08" },
-      { title: "Milk Bottle for Newborn: Ultimate Guide", tags: [], optimized: false, date: "2025-08-08" },
-      { title: "Baby Vomiting Help: What to Do", tags: ["vomiting", "baby care"], optimized: false, date: "2025-08-12" },
-      { title: "When Baby Refuses Breast Milk", tags: ["breastfeeding", "nursing strike"], optimized: false, date: "2025-08-13" },
-      { title: "Lactation Problems Solutions", tags: ["lactation", "breastfeeding"], optimized: false, date: "2025-08-16" },
-      { title: "Everything Mothers Need to Know About Bottle Feeding", tags: ["bottle feeding", "guide"], optimized: false, date: "2025-08-19" },
-      { title: "Being a Parent is Amazing", tags: ["parenthood", "joy"], optimized: false, date: "2025-08-20" },
-      { title: "How Baby Communicates", tags: ["baby cues", "communication"], optimized: false, date: "2025-08-22" },
-      { title: "Working Parent Tips: Balance Work & Family", tags: ["work-life", "parenting"], optimized: false, date: "2025-08-24" },
-      { title: "What to Expect from a Daycare in Indian Metro Cities", tags: ["daycare", "childcare"], optimized: false, date: "2025-08-26" },
-      { title: "Why a High-Quality Bottle Is a Must-Buy", tags: ["premium bottle", "baby bottle"], optimized: false, date: "2025-10-24" },
-      { title: "Silicone Feeding Bottle: Why Upgrade Now", tags: ["silicone", "upgrade"], optimized: false, date: "2025-10-28" },
-      { title: "Do I Need to Sterilize Baby Bottles? 2025 Guide", tags: ["sterilization", "baby bottles"], optimized: false, date: "2025-11-15" },
-      { title: "Baby Teeth and Bottle Nipple Shape", tags: ["dental health", "nipple shape"], optimized: false, date: "2025-11-15" },
-      { title: "Wide-Neck vs Narrow-Neck Bottles", tags: ["bottle comparison", "breastfed baby"], optimized: false, date: "2025-11-16" },
-    ];
-
-    const optCount = articles.filter(a => a.optimized).length;
-    const pendCount = articles.length - optCount;
-    const pct = Math.round((optCount / articles.length) * 100);
-
-    document.getElementById('articles-count').textContent = `${articles.length} articles`;
-    document.getElementById('art-opt-count').textContent = optCount;
-    document.getElementById('art-pend-count').textContent = pendCount;
-    document.getElementById('progress-fill-2').style.width = pct + '%';
-    document.getElementById('progress-fill-2').textContent = `${optCount} / ${articles.length} (${pct}%)`;
-
-    const tbody = document.getElementById('articles-body');
-    tbody.innerHTML = articles.map((a, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td style="max-width:350px;">${a.title}</td>
-        <td style="max-width:200px; font-size:11px; color:var(--gray);">${a.tags.slice(0, 3).join(', ')}${a.tags.length > 3 ? '...' : ''}</td>
-        <td><span class="${a.optimized ? 'opt-yes' : 'opt-no'}">${a.optimized ? '&#10004; Yes' : '&#10008; No'}</span></td>
-        <td style="font-size:12px; color:var(--gray);">${a.date}</td>
-      </tr>
-    `).join('');
-  }
-
-  // ─── Render Products ───
-  function renderProducts() {
-    if (!dashboardData) return;
-    const grid = document.getElementById('products-grid');
-    grid.innerHTML = dashboardData.products.map(p => `
-      <div class="product-card">
-        <span class="product-category">${p.category}</span>
-        <h4>${p.name}</h4>
-        <div class="price">Rs.${p.price.toLocaleString('en-IN')}</div>
-        <div class="handle">${p.handle}</div>
-        <a href="https://thenibbles.shop/products/${p.handle}" target="_blank" class="btn btn-outline btn-sm" style="margin-top:8px;">View on Store</a>
-      </div>
-    `).join('');
-  }
-
-  // ─── Run Daily Engine ───
-  async function runDailyEngine() {
-    const res = await fetch('/api/daily-engine/run', { method: 'POST' });
-    const data = await res.json();
-    showModal('Daily Blog Engine — Run Now', data.run.prompt);
-    renderRecentRuns();
-    showToast('Daily Engine triggered! Copy the prompt to Claude Code.');
-  }
-
-  // ─── Run Workflow ───
-  async function runWorkflow(id) {
-    const res = await fetch(`/api/workflows/${id}/run`, { method: 'POST' });
-    const data = await res.json();
-    showModal(data.run.workflowName, data.run.prompt);
-    renderRecentRuns();
-    showToast(`${data.run.workflowName} triggered!`);
-  }
-
-  // ─── View Prompt ───
-  function viewPrompt(id) {
-    const wf = dashboardData.workflows.find(w => w.id === id);
-    if (wf) showModal(wf.name, wf.prompt);
-  }
-
-  // ─── Render Recent Runs ───
-  async function renderRecentRuns() {
-    const res = await fetch('/api/runs');
-    const runs = await res.json();
-
-    const tbody = document.getElementById('recent-runs-body');
-    const historyBody = document.getElementById('history-body');
-
-    if (runs.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--gray);">No runs yet. Click "Run Now" to start.</td></tr>';
-      historyBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--gray);">No runs yet.</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = runs.slice(0, 5).map(r => `
-      <tr>
-        <td><strong>${r.workflowName}</strong></td>
-        <td><span class="workflow-badge badge-${r.category.toLowerCase().replace('-', '-')}" style="position:static;">${r.category}</span></td>
-        <td><span class="status-badge status-${r.status}">${r.status}</span></td>
-        <td style="font-size:12px; color:var(--gray);">${formatDate(r.timestamp)}</td>
-      </tr>
-    `).join('');
-
-    historyBody.innerHTML = runs.map(r => `
-      <tr>
-        <td style="font-size:11px; color:var(--gray); font-family:monospace;">${r.id.slice(0, 12)}</td>
-        <td><strong>${r.workflowName}</strong></td>
-        <td><span class="workflow-badge badge-${r.category.toLowerCase()}" style="position:static;">${r.category}</span></td>
-        <td><span class="status-badge status-${r.status}">${r.status}</span></td>
-        <td style="font-size:12px; color:var(--gray);">${formatDate(r.timestamp)}</td>
-        <td>
-          <button class="btn btn-sm btn-outline" onclick="markComplete('${r.id}')">Mark Done</button>
-        </td>
-      </tr>
-    `).join('');
-  }
-
-  // ─── Mark run as complete ───
-  async function markComplete(runId) {
-    await fetch(`/api/runs/${runId}/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'completed' })
+  // Magnetic buttons
+  document.querySelectorAll('.magnetic').forEach(btn=>{
+    btn.addEventListener('pointermove',e=>{
+      const r=btn.getBoundingClientRect();
+      gsap.to(btn,{x:(e.clientX-r.left-r.width/2)*.25,y:(e.clientY-r.top-r.height/2)*.25,duration:.3});
     });
-    renderRecentRuns();
-    showToast('Run marked as completed!');
-  }
-
-  async function loadRuns() { renderRecentRuns(); }
-
-  // ─── Modal ───
-  function showModal(title, prompt) {
-    document.getElementById('modal-title').textContent = title;
-    document.getElementById('prompt-text').textContent = prompt;
-    document.getElementById('modal').classList.add('active');
-  }
-  function closeModal() {
-    document.getElementById('modal').classList.remove('active');
-  }
-
-  // ─── Copy Prompt ───
-  function copyPrompt() {
-    const text = document.getElementById('prompt-text').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('Prompt copied to clipboard!');
-    });
-  }
-
-  // ─── Toast ───
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-
-  // ─── Format Date ───
-  function formatDate(iso) {
-    if (!iso) return '--';
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) +
-      ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-  }
-
-  // ─── Close modal on overlay click ───
-  document.getElementById('modal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
+    btn.addEventListener('pointerleave',()=>gsap.to(btn,{x:0,y:0,duration:.5,ease:'elastic.out(1,.4)'}));
   });
+}
 
-  // ─── Boot ───
-  init();
+// Boot
+init();
 </script>
-
 </body>
 </html>

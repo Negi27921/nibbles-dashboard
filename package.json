@@ -1,0 +1,21 @@
+{
+  "name": "nibbles-dashboard",
+  "version": "1.0.0",
+  "description": "Nibbles Organic Marketing Engine — Command Center Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["nibbles", "marketing", "dashboard"],
+  "author": "Team Nibbles",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "node-fetch": "^2.7.0"
+  }
+}

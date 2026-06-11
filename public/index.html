@@ -231,6 +231,223 @@ tr:hover td{background:rgba(255,196,0,.06)}
 .section-header h2{font-family:'Bangers',cursive;font-size:clamp(24px,3.5vw,36px);letter-spacing:.04em}
 @media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr}.workflow-grid{grid-template-columns:1fr}}
 
+/* Tab icons — hidden on desktop, shown on mobile */
+.tab-icon{display:none}
+
+/* ══════════════════════════════════════════════
+   MOBILE — Complete responsive overhaul
+   ══════════════════════════════════════════════ */
+
+/* ─── Mobile Nav: bottom tab bar ─── */
+@media(max-width:860px){
+  nav{padding:8px 12px;gap:8px}
+  .nav-logo{font-size:20px;gap:6px}
+  .nav-logo .dot{width:8px;height:8px}
+  .nav-tabs{display:flex!important;position:fixed;bottom:0;left:0;right:0;z-index:8000;background:var(--paper);border-top:3px solid var(--ink);padding:6px 4px env(safe-area-inset-bottom,6px);gap:2px;justify-content:space-around;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+  .tab-icon{display:block;font-size:18px;line-height:1}
+  .nav-tab{font-size:8px;letter-spacing:.06em;padding:6px 4px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;flex:1}
+  .nav-tab .badge-count{top:-2px;right:-2px;width:14px;height:14px;font-size:7px}
+  .nav-tab.active{box-shadow:2px 2px 0 var(--ink)}
+  .nav-visit{display:none!important}
+  main{padding-top:52px;padding-bottom:80px}
+  .tab-content{padding:12px}
+}
+
+/* ─── Mobile: Engine Panel ─── */
+@media(max-width:600px){
+  .engine-panel{flex-direction:column;text-align:center;padding:20px 16px;gap:16px;border-width:2px;box-shadow:3px 3px 0 var(--ink)}
+  .engine-panel h2{font-size:24px}
+  .engine-panel p{font-size:12px;margin-top:4px}
+  .engine-meta{justify-content:center;gap:8px}
+  .engine-meta-item{padding:6px 10px;font-size:10px}
+  .engine-meta-item strong{font-size:12px}
+  .btn-fire{font-size:18px;padding:12px 28px;width:100%}
+}
+
+/* ─── Mobile: Stat Cards ─── */
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+  .stat-card{padding:14px 12px;border-width:2px;box-shadow:3px 3px 0 var(--ink);transform:none!important}
+  .stat-card:hover{transform:none!important;box-shadow:3px 3px 0 var(--ink)}
+  .stat-card::after{display:none}
+  .stat-icon{font-size:20px;margin-bottom:2px}
+  .stat-value{font-size:28px!important}
+  .stat-label{font-size:8px;letter-spacing:.12em;margin-top:4px}
+}
+
+/* ─── Mobile: Cards ─── */
+@media(max-width:600px){
+  .card{border-width:2px;box-shadow:3px 3px 0 var(--ink);border-radius:12px}
+  .card:hover{box-shadow:3px 3px 0 var(--ink)}
+  .card-header{padding:12px 14px}
+  .card-header h3{font-size:15px}
+  .card-body{padding:14px}
+}
+
+/* ─── Mobile: Progress ─── */
+@media(max-width:600px){
+  .progress-container{height:18px;border-width:2px}
+  .progress-fill{font-size:10px;min-width:40px}
+}
+
+/* ─── Mobile: Calendar ─── */
+@media(max-width:600px){
+  .calendar-grid{grid-template-columns:repeat(4,1fr)!important;gap:6px}
+  .cal-day{padding:8px 4px;border-width:2px;border-radius:8px}
+  .cal-day .day-name{font-size:13px}
+  .cal-day .day-topic{font-size:9px;line-height:1.2}
+}
+@media(max-width:400px){
+  .calendar-grid{grid-template-columns:repeat(3,1fr)!important}
+}
+
+/* ─── Mobile: Workflow Cards ─── */
+@media(max-width:600px){
+  .workflow-grid{gap:12px}
+  .workflow-card{padding:14px;border-width:2px;box-shadow:3px 3px 0 var(--ink);transform:none!important;flex-direction:column;gap:10px}
+  .workflow-card:hover{transform:none!important;box-shadow:3px 3px 0 var(--ink)}
+  .wf-num{width:32px;height:32px;font-size:14px;border-width:2px}
+  .wf-content h4{font-size:15px}
+  .wf-content p{font-size:11px}
+  .wf-badge{font-size:8px;padding:3px 8px;right:10px}
+  .wf-actions{flex-direction:column;gap:6px}
+  .wf-actions .btn{width:100%;justify-content:center;font-size:13px;padding:8px 12px}
+}
+
+/* ─── Mobile: Tables (horizontal scroll + compact) ─── */
+@media(max-width:600px){
+  .table-wrap{border-width:2px;box-shadow:3px 3px 0 var(--ink);border-radius:12px}
+  th{padding:8px 10px;font-size:8px;letter-spacing:.12em}
+  td{padding:8px 10px;font-size:11px}
+  .metric-cell{font-size:10px}
+  .metric-cell .before{font-size:9px}
+  .metric-cell .after{font-size:11px}
+  .metric-cell .arrow{font-size:8px}
+  .delta{font-size:9px;padding:1px 4px}
+  .impact-badge{font-size:11px;padding:2px 8px;border-width:1.5px}
+  .opt-yes,.opt-no{font-size:12px}
+  .tag-chip{font-size:8px;padding:1px 5px}
+}
+
+/* ─── Mobile: Product Cards ─── */
+@media(max-width:600px){
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .product-card{padding:14px;border-width:2px;box-shadow:3px 3px 0 var(--ink);transform:none!important}
+  .product-card:hover{transform:none!important;box-shadow:3px 3px 0 var(--ink)}
+  .product-cat{font-size:8px;letter-spacing:.14em}
+  .product-card h4{font-size:14px}
+  .product-price{font-size:20px}
+  .product-handle{font-size:8px}
+  .product-card .btn-ghost{font-size:10px;padding:5px 10px;margin-top:8px}
+}
+
+/* ─── Mobile: Knowledge Hub ─── */
+@media(max-width:600px){
+  .knowledge-section{margin-bottom:24px}
+  .knowledge-section .eyebrow{font-size:9px;letter-spacing:.25em;gap:8px;margin-bottom:10px}
+  .knowledge-section .eyebrow::before{width:20px;height:2px}
+  .knowledge-section h2{font-size:28px!important;margin-bottom:14px}
+  .knowledge-card{padding:18px;border-width:2px;box-shadow:3px 3px 0 var(--ink)}
+  .knowledge-card:hover{transform:none;box-shadow:3px 3px 0 var(--ink)}
+  .knowledge-card h3{font-size:18px}
+  .knowledge-card p{font-size:13px;line-height:1.6}
+  .knowledge-card li{font-size:12px}
+  .knowledge-card .why-box{font-size:14px;padding:12px 14px;transform:none}
+  .knowledge-grid{grid-template-columns:1fr!important;gap:12px}
+  .step-card{padding:16px;border-width:2px;box-shadow:3px 3px 0 var(--ink);transform:none!important}
+  .step-card:hover{transform:none!important;box-shadow:3px 3px 0 var(--ink)}
+  .step-num{font-size:28px}
+  .step-card h4{font-size:16px}
+  .step-card p{font-size:12px}
+}
+
+/* ─── Mobile: Marquee ─── */
+@media(max-width:600px){
+  .marquee{padding:8px 0;margin:14px 0;border-width:2px}
+  .marquee-track{font-size:16px;letter-spacing:.08em}
+  .marquee-track span{padding:0 14px}
+}
+
+/* ─── Mobile: Modal ─── */
+@media(max-width:600px){
+  .modal{width:96%;max-height:88vh;border-radius:14px;border-width:2px;box-shadow:6px 6px 0 var(--ink)}
+  .modal-header{padding:14px 16px}
+  .modal-header h3{font-size:18px}
+  .modal-close{width:30px;height:30px;font-size:14px}
+  .modal-body{padding:16px}
+  .prompt-box{font-size:10px;padding:12px;line-height:1.5}
+  .copy-btn{padding:4px 10px;font-size:9px}
+  .modal-footer{padding:12px 16px}
+  .exec-steps li{padding:8px 10px;font-size:11px;border-width:1.5px;border-radius:8px;margin-bottom:6px}
+  .exec-steps .step-icon{width:18px;height:18px;font-size:9px}
+  .exec-result{padding:14px;border-width:2px}
+  .exec-result h4{font-size:15px}
+  .exec-result p,.exec-result li{font-size:12px}
+}
+
+/* ─── Mobile: Toast ─── */
+@media(max-width:600px){
+  .toast{bottom:90px;right:12px;left:12px;font-size:14px;padding:10px 16px;border-radius:10px;border-width:2px;box-shadow:4px 4px 0 var(--ink);text-align:center}
+}
+
+/* ─── Mobile: Section Headers ─── */
+@media(max-width:600px){
+  .section-header{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:14px}
+  .section-header h2{font-size:22px!important}
+  .section-header .btn{font-size:11px;padding:6px 12px}
+}
+
+/* ─── Mobile: GSC Status ─── */
+@media(max-width:600px){
+  #gsc-status .card-body{padding:8px 12px!important;flex-wrap:wrap}
+  #gsc-status .card-body span:first-child{font-size:16px}
+  #gsc-status .card-body span:last-child{font-size:11px!important}
+}
+
+/* ─── Mobile: Buttons ─── */
+@media(max-width:600px){
+  .btn{font-size:14px;padding:8px 16px;border-width:2px;border-radius:10px;gap:6px}
+  .btn-run{font-size:12px;padding:7px 14px;box-shadow:2px 2px 0 var(--ink)}
+  .btn-ghost{font-size:11px;padding:5px 12px}
+  .btn-fire{box-shadow:3px 3px 0 var(--ink)}
+  .btn-fire:hover{box-shadow:3px 3px 0 var(--ink);transform:none}
+}
+
+/* ─── Mobile: Quick Launch (in overview) ─── */
+@media(max-width:600px){
+  .grid-2.mb-24>.card:last-child .card-body{gap:6px!important}
+  .grid-2.mb-24>.card:last-child .btn-run{font-size:11px;padding:7px 12px}
+}
+
+/* ─── Mobile: History table ─── */
+@media(max-width:600px){
+  #tab-history .table-wrap{border-width:2px}
+}
+
+/* ─── Mobile: Disable 3D tilt (too jittery on touch) ─── */
+@media(hover:none){
+  .card:hover::before{opacity:0!important}
+  .card:hover{box-shadow:var(--shadow)!important}
+  .workflow-card:hover::before{opacity:0!important}
+}
+
+/* ─── Mobile: Filter dropdown ─── */
+@media(max-width:600px){
+  #art-filter{font-size:10px;padding:4px 8px;border-width:1.5px}
+}
+
+/* ─── Tiny screens (≤380px) ─── */
+@media(max-width:380px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-value{font-size:24px!important}
+  .stat-label{font-size:7px}
+  .stat-icon{font-size:16px}
+  .nav-tab{font-size:7px;padding:5px 3px}
+  .products-grid{grid-template-columns:1fr;gap:10px}
+  .engine-panel h2{font-size:20px}
+  .knowledge-section h2{font-size:24px!important}
+}
+
 /* ─── SUBTLE CLICK EFFECT ─── */
 .comic-burst{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%) scale(0);font-family:'Bangers',cursive;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border:2px solid var(--ink);border-radius:8px;white-space:nowrap;opacity:0}
 .comic-burst.pop{animation:burstPop .45s ease-out forwards}
@@ -267,12 +484,12 @@ tr:hover td{background:rgba(255,196,0,.06)}
 <nav>
   <div class="nav-logo"><span class="dot"></span> NIBBLES<span>.</span>ENGINE</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" data-tab="overview">Overview</button>
-    <button class="nav-tab" data-tab="workflows">Workflows <span class="badge-count">14</span></button>
-    <button class="nav-tab" data-tab="articles">Articles</button>
-    <button class="nav-tab" data-tab="products">Products</button>
-    <button class="nav-tab" data-tab="knowledge">Knowledge Hub</button>
-    <button class="nav-tab" data-tab="history">History</button>
+    <button class="nav-tab active" data-tab="overview"><span class="tab-icon">⚡</span>Overview</button>
+    <button class="nav-tab" data-tab="workflows"><span class="tab-icon">🔧</span>Workflows <span class="badge-count">14</span></button>
+    <button class="nav-tab" data-tab="articles"><span class="tab-icon">📝</span>Articles</button>
+    <button class="nav-tab" data-tab="products"><span class="tab-icon">🍼</span>Products</button>
+    <button class="nav-tab" data-tab="knowledge"><span class="tab-icon">📚</span>Hub</button>
+    <button class="nav-tab" data-tab="history"><span class="tab-icon">📋</span>History</button>
   </div>
   <a class="nav-visit" href="https://thenibbles.shop" target="_blank" rel="noopener">Visit Store &#8599;</a>
 </nav>

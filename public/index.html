@@ -212,6 +212,22 @@ tr:hover td{background:rgba(255,196,0,.06)}
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
 .section-header h2{font-family:'Bangers',cursive;font-size:clamp(24px,3.5vw,36px);letter-spacing:.04em}
 @media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr}.workflow-grid{grid-template-columns:1fr}}
+
+/* ─── COMIC BURST CLICK EFFECT ─── */
+.comic-burst{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%) scale(0) rotate(-12deg);font-family:'Bangers',cursive;font-size:clamp(28px,4vw,48px);letter-spacing:.06em;text-transform:uppercase;padding:10px 22px;border:4px solid var(--ink);border-radius:18px;white-space:nowrap;text-shadow:2px 2px 0 rgba(0,0,0,.15);box-shadow:6px 6px 0 var(--ink)}
+.comic-burst.pop{animation:burstPop .7s cubic-bezier(.22,1.2,.36,1) forwards}
+@keyframes burstPop{
+  0%{transform:translate(-50%,-50%) scale(0) rotate(-12deg);opacity:1}
+  30%{transform:translate(-50%,-50%) scale(1.25) rotate(4deg);opacity:1}
+  50%{transform:translate(-50%,-50%) scale(1) rotate(-2deg);opacity:1}
+  80%{transform:translate(-50%,-60%) scale(.95) rotate(0deg);opacity:.8}
+  100%{transform:translate(-50%,-80%) scale(.7) rotate(6deg);opacity:0}
+}
+/* Starburst SVG behind text */
+.comic-burst::before{content:"";position:absolute;inset:-20px;z-index:-1;background:inherit;clip-path:polygon(50% 0%,63% 28%,98% 20%,72% 45%,100% 65%,68% 62%,60% 100%,50% 70%,40% 100%,32% 62%,0% 65%,28% 45%,2% 20%,37% 28%);opacity:.35}
+/* Ring ripple */
+.click-ring{position:fixed;pointer-events:none;z-index:9998;border:3px solid var(--red);border-radius:50%;transform:translate(-50%,-50%) scale(0);opacity:.7;animation:ringExpand .6s ease-out forwards}
+@keyframes ringExpand{to{transform:translate(-50%,-50%) scale(1);opacity:0}}
 </style>
 </head>
 <body>
@@ -695,6 +711,41 @@ function initAnimations(){
     btn.addEventListener('pointerleave',()=>gsap.to(btn,{x:0,y:0,duration:.5,ease:'elastic.out(1,.4)'}));
   });
 }
+
+// ─── Comic Burst Click Effects ───
+const BURSTS=[
+  {text:'WACK!',bg:'#FFC400',color:'#15151C'},
+  {text:'BOOM!',bg:'#E0202F',color:'#fff'},
+  {text:'POW!',bg:'#2342D6',color:'#fff'},
+  {text:'ZAP!',bg:'#FFC400',color:'#15151C'},
+  {text:'BAM!',bg:'#E0202F',color:'#fff'},
+  {text:'SNAP!',bg:'#2e7d32',color:'#fff'},
+  {text:'CRACK!',bg:'#7c3aed',color:'#fff'},
+  {text:'WHAP!',bg:'#e65100',color:'#fff'},
+  {text:'KAPOW!',bg:'#0d9488',color:'#fff'},
+  {text:'SMASH!',bg:'#E0202F',color:'#fff'},
+];
+let burstIdx=0;
+document.addEventListener('click',e=>{
+  // Ring ripple
+  const ring=document.createElement('div');
+  ring.className='click-ring';
+  ring.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;width:80px;height:80px`;
+  document.body.appendChild(ring);
+  setTimeout(()=>ring.remove(),600);
+
+  // Comic burst word
+  const b=BURSTS[burstIdx%BURSTS.length];
+  burstIdx++;
+  const el=document.createElement('div');
+  el.className='comic-burst';
+  el.textContent=b.text;
+  el.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;background:${b.bg};color:${b.color}`;
+  document.body.appendChild(el);
+  // Trigger animation next frame
+  requestAnimationFrame(()=>el.classList.add('pop'));
+  setTimeout(()=>el.remove(),750);
+});
 
 // Boot
 init();

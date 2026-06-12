@@ -14,6 +14,7 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 
 // ─── Fallback in-memory (used when Supabase not configured) ───
 let memoryRuns = [];
+let memoryArticles = [];
 
 // ─── Helper: Save run to Supabase or memory ───
 async function saveRun(run) {
@@ -62,6 +63,71 @@ async function getGeneratedContent(limit = 50) {
     return data || [];
   }
   return [];
+}
+
+// ─── Articles: dynamic store (Supabase blog_articles table or in-memory) ───
+async function getArticles() {
+  if (supabase) {
+    const { data, error } = await supabase.from('blog_articles').select('*').order('published_at', { ascending: false });
+    if (!error && data) return data;
+  }
+  return memoryArticles;
+}
+
+async function upsertArticles(articles) {
+  const results = [];
+  for (const art of articles) {
+    const record = {
+      shopify_id: art.shopify_id,
+      title: art.title,
+      handle: art.handle,
+      published_at: art.published_at || null,
+      tags: art.tags || [],
+      optimized: art.optimized || false,
+      is_new: art.is_new || false,
+      optimized_date: art.optimized ? (art.optimized_date || new Date().toISOString()) : null,
+      created_date: art.created_date || null,
+      word_count: art.word_count || 0,
+      has_key_takeaways: art.has_key_takeaways || false,
+      has_faq: art.has_faq || false,
+      has_comparison_table: art.has_comparison_table || false,
+      updated_at: new Date().toISOString()
+    };
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .upsert([record], { onConflict: 'shopify_id' })
+        .select();
+      if (!error && data) results.push(data[0]);
+      else results.push(record);
+    } else {
+      const idx = memoryArticles.findIndex(a => a.shopify_id === record.shopify_id);
+      if (idx >= 0) memoryArticles[idx] = { ...memoryArticles[idx], ...record };
+      else memoryArticles.push(record);
+      results.push(record);
+    }
+  }
+  return results;
+}
+
+async function computeStats() {
+  const articles = await getArticles();
+  const total = articles.length;
+  const optimized = articles.filter(a => a.optimized).length;
+  const remaining = total - optimized;
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const newThisWeek = articles.filter(a => a.is_new && a.created_date && a.created_date > sevenDaysAgo).length;
+  const runs = await getRuns(100);
+  return {
+    totalArticles: total || 52,
+    optimizedArticles: optimized || 10,
+    remainingArticles: remaining || 42,
+    daysToComplete: remaining > 0 ? Math.ceil(remaining / 3) : 0,
+    totalWorkflows: 14,
+    newThisWeek: newThisWeek,
+    completedRuns: runs.filter(r => r.status === 'completed').length
+  };
 }
 
 // ─── SPECIALIST-LEVEL WORKFLOW PROMPTS ───
@@ -712,15 +778,7 @@ app.get('/api/dashboard', async (req, res) => {
     workflows: WORKFLOWS.map(w => ({ ...w, prompt: w.prompt })),
     recentRuns: runs,
     generatedContent: content,
-    stats: {
-      totalArticles: 52,
-      optimizedArticles: 10,
-      remainingArticles: 42,
-      daysToComplete: Math.ceil(42 / 3),
-      totalWorkflows: 14,
-      newThisWeek: 2,
-      completedRuns: runs.filter(r => r.status === 'completed').length
-    },
+    stats: await computeStats(),
     products: [
       { name: "Anti-Colic Bottle 210ml", price: 1670, handle: "nibbles-multi-purpose-silicone-feeding-bottle-210-ml-ml-anti-colic-bpa-free-soft-nipple", category: "Bottles" },
       { name: "Silicone Spoon Feeder 120ml", price: 1570, handle: "silicone-spoon-feeder-120ml-nibbles", category: "Feeders" },
@@ -888,6 +946,50 @@ function getTopProducts(content) {
   content.forEach(c => (c.products_linked || []).forEach(p => { prodCount[p] = (prodCount[p] || 0) + 1; }));
   return Object.entries(prodCount).sort((a, b) => b[1] - a[1]).map(([product, count]) => ({ product, count }));
 }
+
+// ─── Articles (dynamic, real-time) ───
+
+// Get all articles
+app.get('/api/articles', async (req, res) => {
+  const articles = await getArticles();
+  res.json(articles);
+});
+
+// Sync/upsert articles (called after engine runs or manually)
+app.post('/api/articles/sync', async (req, res) => {
+  const { articles } = req.body;
+  if (!articles || !Array.isArray(articles)) return res.status(400).json({ error: 'articles array required' });
+  const results = await upsertArticles(articles);
+  res.json({ success: true, synced: results.length, articles: results });
+});
+
+// Mark article(s) as optimized
+app.post('/api/articles/optimize', async (req, res) => {
+  const { shopify_ids } = req.body;
+  if (!shopify_ids || !Array.isArray(shopify_ids)) return res.status(400).json({ error: 'shopify_ids array required' });
+
+  const results = [];
+  for (const sid of shopify_ids) {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .update({ optimized: true, optimized_date: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq('shopify_id', sid)
+        .select();
+      if (!error && data && data[0]) results.push(data[0]);
+    } else {
+      const art = memoryArticles.find(a => a.shopify_id === sid);
+      if (art) { art.optimized = true; art.optimized_date = new Date().toISOString(); results.push(art); }
+    }
+  }
+  res.json({ success: true, updated: results.length, articles: results });
+});
+
+// Get dynamic stats
+app.get('/api/stats', async (req, res) => {
+  const stats = await computeStats();
+  res.json(stats);
+});
 
 // ─── Google Search Console API ───
 const { google } = require('googleapis');

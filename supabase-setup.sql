@@ -62,10 +62,29 @@ CREATE TABLE IF NOT EXISTS blog_metrics (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Enable Row Level Security (RLS) — open for now (dashboard is private)
+-- 4. Blog Articles — dynamic article registry (replaces hardcoded list)
+CREATE TABLE IF NOT EXISTS blog_articles (
+  shopify_id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  handle TEXT,
+  published_at TIMESTAMPTZ,
+  tags TEXT[] DEFAULT '{}',
+  optimized BOOLEAN DEFAULT FALSE,
+  is_new BOOLEAN DEFAULT FALSE,
+  optimized_date TIMESTAMPTZ,
+  created_date TIMESTAMPTZ,
+  word_count INTEGER DEFAULT 0,
+  has_key_takeaways BOOLEAN DEFAULT FALSE,
+  has_faq BOOLEAN DEFAULT FALSE,
+  has_comparison_table BOOLEAN DEFAULT FALSE,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. Enable Row Level Security (RLS) — open for now (dashboard is private)
 ALTER TABLE workflow_runs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE generated_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blog_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_articles ENABLE ROW LEVEL SECURITY;
 
 -- Allow all operations (dashboard is not public-facing)
 DO $$ BEGIN
@@ -76,7 +95,14 @@ DO $$ BEGIN
     CREATE POLICY "Allow all on generated_content" ON generated_content FOR ALL USING (true) WITH CHECK (true);
   END IF;
 END $$;
-CREATE POLICY "Allow all on blog_metrics" ON blog_metrics FOR ALL USING (true) WITH CHECK (true);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow all on blog_metrics') THEN
+    CREATE POLICY "Allow all on blog_metrics" ON blog_metrics FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow all on blog_articles') THEN
+    CREATE POLICY "Allow all on blog_articles" ON blog_articles FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+END $$;
 
 -- 5. Indexes for fast queries
 CREATE INDEX IF NOT EXISTS idx_runs_created ON workflow_runs (created_at DESC);
@@ -85,4 +111,7 @@ CREATE INDEX IF NOT EXISTS idx_runs_workflow ON workflow_runs (workflow_id);
 CREATE INDEX IF NOT EXISTS idx_content_created ON generated_content (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_content_type ON generated_content (type);
 CREATE INDEX IF NOT EXISTS idx_metrics_optimized ON blog_metrics (optimized);
+CREATE INDEX IF NOT EXISTS idx_articles_optimized ON blog_articles (optimized);
+CREATE INDEX IF NOT EXISTS idx_articles_new ON blog_articles (is_new);
+CREATE INDEX IF NOT EXISTS idx_articles_published ON blog_articles (published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_metrics_title ON blog_metrics (article_title);

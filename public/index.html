@@ -136,6 +136,8 @@ td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--line)}
 tr:hover td{background:rgba(255,196,0,.06)}
 .opt-yes{color:var(--green);font-family:'Bangers',cursive;font-size:15px}
 .opt-no{color:var(--red);font-family:'Bangers',cursive;font-size:15px}
+.pill-new{display:inline-block;background:var(--green);color:#fff;font-family:'Bangers',cursive;font-size:11px;letter-spacing:.1em;padding:2px 8px;border-radius:6px;border:2px solid var(--ink);margin-right:4px;animation:pill-pulse 2s infinite;box-shadow:2px 2px 0 var(--ink)}
+@keyframes pill-pulse{0%,100%{box-shadow:2px 2px 0 var(--ink)}50%{box-shadow:2px 2px 8px var(--green)}}
 .tag-chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-family:'JetBrains Mono',monospace;border:1px solid var(--line);margin:1px;background:var(--paper-2);font-weight:500}
 
 /* ─── PRODUCT CARDS ─── */
@@ -637,6 +639,7 @@ tr:hover td{background:rgba(255,196,0,.06)}
         <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft)">28-day window</span>
         <select id="art-filter" style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);cursor:pointer" onchange="filterArticles()">
           <option value="all">All Articles</option>
+          <option value="new">&#127381; New</option>
           <option value="optimized">Optimized Only</option>
           <option value="pending">Pending Only</option>
           <option value="improved">Improved &#9650;</option>
@@ -855,14 +858,16 @@ async function init(){
 }
 
 // ─── Overview ───
-function renderOverview(){
+async function renderOverview(){
   if(!D)return;
-  const s=D.stats;
+  // Fetch live stats (dynamic from Supabase blog_articles)
+  let s=D.stats;
+  try{const sr=await fetch('/api/stats');s=await sr.json();}catch(e){}
   document.getElementById('stat-total').textContent=s.totalArticles;
   document.getElementById('stat-optimized').textContent=s.optimizedArticles;
   document.getElementById('stat-remaining').textContent=s.remainingArticles;
   document.getElementById('stat-days').textContent='~'+s.daysToComplete+'d';
-  const pct=Math.round((s.optimizedArticles/s.totalArticles)*100);
+  const pct=s.totalArticles?Math.round((s.optimizedArticles/s.totalArticles)*100):0;
   document.getElementById('progress-pct').textContent=pct+'%';
   document.getElementById('progress-fill').style.width=pct+'%';
   document.getElementById('progress-fill').textContent=s.optimizedArticles+' / '+s.totalArticles;
@@ -922,23 +927,46 @@ async function renderArticles(){
     }
   }catch(e){}
 
-  // Build unified article list from GSC data + known articles
-  const KNOWN=[
-    {title:"Best Anti-Colic Bottles India 2026",opt:true},{title:"Silicone vs Plastic Baby Bottles India 2026",opt:true},{title:"When to Start Spoon Feeding Baby India 2026",opt:true},{title:"How to Bottle Feed Newborn Baby India 2026",opt:true},{title:"Paced Bottle Feeding India Guide 2026",opt:true},{title:"How to Take Care of Baby First Month India 2026",opt:true},{title:"Monsoon Baby Care India 2026",opt:true},
-    {title:"How to Develop Curiosity in Children Using Sensory Toys",opt:false},{title:"Hidden Toxins in Baby Toys",opt:false},{title:"How to Sterilize Baby Bottles at Home",opt:false},{title:"Choosing the Perfect Baby Bottle Nipple",opt:false},{title:"Why Clean Air Matters for Baby's Growth",opt:false},{title:"How to Teach Your Baby to Focus",opt:false},{title:"How to Talk to Your Baby for Brain Development",opt:false},{title:"Managing Rest & Personal Time for Mothers",opt:false},{title:"15 Beautiful Experiences Before First Birthday",opt:false},{title:"9 Ways to Encourage Baby to Walk",opt:false},{title:"Essential Growth Nutrients for Indian Babies",opt:false},{title:"Are Steel Feeder Bottles Safe?",opt:false},{title:"7 Things Parents Often Forget",opt:false},{title:"Best Baby Feeding Spoon in India",opt:false},{title:"The Best Ways to Bottle Feed Your Baby",opt:false},{title:"10 Baby Items You Must Sterilize Daily",opt:false},{title:"Top 5 Baby Feeding Bottles in India 2025",opt:false},{title:"How to Use Milk Formula for Your Baby",opt:false},{title:"Types of Baby Bottles: Why Silicone Outshines",opt:false},{title:"How to Choose Replacement Nipples",opt:false},{title:"Best Baby Feeding Bottles India Buy Online",opt:false},{title:"The Only Guide to Choose Milk Bottle for Newborn",opt:false},{title:"How Long Should a Bottle and Nipple Last?",opt:false},{title:"The Science Behind Our Bottle Design",opt:false},{title:"Before the Baby Arrives What to Know",opt:false},{title:"Vitamin and Nutrient Guide for Babies",opt:false},{title:"6 Foods That Power Babys Brain and Body",opt:false},{title:"11 Nutrient-Rich Foods for Healthy Pregnancy",opt:false},{title:"Baby Feeding Schedule by Age",opt:false},{title:"How to Check if Baby is Allergic to Food",opt:false},{title:"Milk Bottle for Newborn Ultimate Guide",opt:false},{title:"Baby Vomiting Help What to Do",opt:false},{title:"When Baby Refuses Breast Milk",opt:false},{title:"Lactation Problems Solutions",opt:false},{title:"Everything About Bottle Feeding for Mothers",opt:false},{title:"Being a Parent is Amazing",opt:false},{title:"How Baby Communicates",opt:false},{title:"Working Parent Tips",opt:false},{title:"What to Expect from Daycare in Indian Metros",opt:false},{title:"Why a High-Quality Bottle Is a Must-Buy",opt:false},{title:"Silicone Feeding Bottle Why Upgrade Now",opt:false},{title:"Do I Need to Sterilize Baby Bottles?",opt:false},{title:"Baby Teeth and Bottle Nipple Shape",opt:false},{title:"Wide-Neck vs Narrow-Neck Bottles",opt:false}
-  ];
+  // Fetch articles from dynamic API (Supabase-backed)
+  let dbArticles=[];
+  try{const aRes=await fetch('/api/articles');dbArticles=await aRes.json();}catch(e){}
 
-  // Merge GSC data with known articles
-  allArticles=KNOWN.map(k=>{
+  // If no articles in DB yet, use stats from dashboard data
+  if(dbArticles.length===0 && D && D.stats){
+    // Show stats from dashboard API (computed from whatever source)
+    allArticles=[];
+    document.getElementById('art-total').textContent=D.stats.totalArticles;
+    document.getElementById('art-opt').textContent=D.stats.optimizedArticles;
+    document.getElementById('art-pend').textContent=D.stats.remainingArticles;
+    document.getElementById('art-clicks').textContent='--';
+    document.getElementById('art-impressions').textContent='--';
+    document.getElementById('art-avg-pos').textContent='--';
+    const pct2=Math.round((D.stats.optimizedArticles/D.stats.totalArticles)*100);
+    document.getElementById('progress-fill-2').style.width=pct2+'%';
+    document.getElementById('progress-fill-2').textContent=D.stats.optimizedArticles+' / '+D.stats.totalArticles;
+    document.getElementById('articles-perf-body').innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--ink-soft)">Run <strong>Sync Articles</strong> to load article data from Shopify into the dashboard.</td></tr>';
+    return;
+  }
+
+  // Build unified article list from DB articles + GSC data
+  const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000).toISOString();
+  allArticles=dbArticles.map(a=>{
     const gscMatch=gscData.find(g=>{
       const slug=g.page.split('/').pop().toLowerCase().replace(/-/g,' ');
-      return k.title.toLowerCase().includes(slug.slice(0,20))||slug.includes(k.title.toLowerCase().slice(0,20));
+      return(a.handle&&slug.includes(a.handle.slice(0,20)))||(a.title&&a.title.toLowerCase().includes(slug.slice(0,15)));
     });
-    const metricMatch=metrics.find(m=>m.article_title&&m.article_title.toLowerCase().includes(k.title.toLowerCase().slice(0,20)));
+    const metricMatch=metrics.find(m=>m.article_title&&(
+      m.article_title.toLowerCase().includes(a.title.toLowerCase().slice(0,20))||
+      (a.handle&&m.article_url&&m.article_url.includes(a.handle))
+    ));
     return{
-      title:k.title,
-      opt:k.opt,
-      url:gscMatch?gscMatch.page:(metricMatch?metricMatch.article_url:''),
+      title:a.title,
+      handle:a.handle||'',
+      opt:!!a.optimized,
+      isNew:!!a.is_new,
+      createdDate:a.created_date||null,
+      recentlyNew:a.is_new&&a.created_date&&a.created_date>sevenDaysAgo,
+      url:gscMatch?gscMatch.page:(metricMatch?metricMatch.article_url:(a.handle?'https://thenibbles.shop/blogs/news/'+a.handle:'')),
       clicks:gscMatch?gscMatch.clicks:(metricMatch?metricMatch.after_clicks:0),
       impressions:gscMatch?gscMatch.impressions:(metricMatch?metricMatch.after_impressions:0),
       ctr:gscMatch?gscMatch.ctr:(metricMatch?metricMatch.after_ctr:0),
@@ -946,7 +974,11 @@ async function renderArticles(){
       before_clicks:metricMatch?metricMatch.before_clicks:0,
       before_impressions:metricMatch?metricMatch.before_impressions:0,
       before_ctr:metricMatch?metricMatch.before_ctr:0,
-      before_position:metricMatch?metricMatch.before_position:0
+      before_position:metricMatch?metricMatch.before_position:0,
+      hasFaq:!!a.has_faq,
+      hasKeyTakeaways:!!a.has_key_takeaways,
+      hasComparisonTable:!!a.has_comparison_table,
+      tags:a.tags||[]
     };
   });
 
@@ -964,7 +996,7 @@ async function renderArticles(){
   document.getElementById('art-impressions').textContent=totalImps>999?(totalImps/1000).toFixed(1)+'K':totalImps;
   document.getElementById('art-avg-pos').textContent=avgPos||'--';
 
-  const pct2=Math.round(optCount/allArticles.length*100);
+  const pct2=allArticles.length?Math.round(optCount/allArticles.length*100):0;
   document.getElementById('progress-fill-2').style.width=pct2+'%';
   document.getElementById('progress-fill-2').textContent=optCount+' / '+allArticles.length;
 
@@ -975,20 +1007,23 @@ function renderArticleRows(filter){
   let arts=allArticles;
   if(filter==='optimized')arts=arts.filter(a=>a.opt);
   if(filter==='pending')arts=arts.filter(a=>!a.opt);
+  if(filter==='new')arts=arts.filter(a=>a.isNew||a.recentlyNew);
   if(filter==='improved')arts=arts.filter(a=>(a.clicks-a.before_clicks)>0);
   if(filter==='declined')arts=arts.filter(a=>(a.clicks-a.before_clicks)<0);
 
-  // Sort: optimized first, then by clicks desc
-  arts.sort((a,b)=>{if(a.opt!==b.opt)return a.opt?-1:1;return b.clicks-a.clicks;});
+  // Sort: new first, then optimized, then by clicks desc
+  arts.sort((a,b)=>{
+    if(a.recentlyNew!==b.recentlyNew)return a.recentlyNew?-1:1;
+    if(a.opt!==b.opt)return a.opt?-1:1;
+    return b.clicks-a.clicks;
+  });
 
   document.getElementById('articles-perf-body').innerHTML=arts.map(a=>{
     const cd=a.clicks-a.before_clicks;
     const id=a.impressions-a.before_impressions;
     const ctrd=Math.round((a.ctr-a.before_ctr)*100)/100;
     const pd=Math.round((a.position-a.before_position)*10)/10;
-    // For position, lower is better so negative delta = improvement
     const posImproved=pd<0;
-    const clicksUp=cd>0;
     const overallScore=cd+(id/10)+(ctrd*10)-(pd*2);
     let impact='neutral',impactText='—';
     if(a.opt&&overallScore>5){impact='positive';impactText='&#9650; UP';}
@@ -996,9 +1031,20 @@ function renderArticleRows(filter){
     else if(a.opt){impact='neutral';impactText='&#8596; FLAT';}
     else{impact='new';impactText='PENDING';}
 
+    // Status pill: NEW (green pulse), DONE, or PENDING
+    let statusPill='';
+    if(a.isNew||a.recentlyNew){
+      statusPill='<span class="pill-new">NEW</span>';
+    }
+    if(a.opt){
+      statusPill+='<span class="opt-yes">DONE</span>';
+    }else if(!a.isNew&&!a.recentlyNew){
+      statusPill='<span class="opt-no">PENDING</span>';
+    }
+
     return`<tr>
       <td style="max-width:280px"><div style="font-weight:600;font-size:13px;line-height:1.3">${a.title}</div>${a.url?'<div style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--ink-soft);margin-top:2px;word-break:break-all">'+a.url.split('/').pop().slice(0,50)+'</div>':''}</td>
-      <td><span class="${a.opt?'opt-yes':'opt-no'}">${a.opt?'DONE':'PENDING'}</span></td>
+      <td>${statusPill}</td>
       <td class="metric-cell"><span class="before">${a.before_clicks}</span><span class="arrow">→</span><span class="after">${a.clicks}</span><br><span class="delta ${cd>0?'delta-up':cd<0?'delta-down':'delta-flat'}">${cd>0?'+':''}${cd}</span></td>
       <td class="metric-cell"><span class="before">${a.before_impressions}</span><span class="arrow">→</span><span class="after">${a.impressions}</span><br><span class="delta ${id>0?'delta-up':id<0?'delta-down':'delta-flat'}">${id>0?'+':''}${id}</span></td>
       <td class="metric-cell"><span class="before">${a.before_ctr}%</span><span class="arrow">→</span><span class="after">${a.ctr}%</span><br><span class="delta ${ctrd>0?'delta-up':ctrd<0?'delta-down':'delta-flat'}">${ctrd>0?'+':''}${ctrd}%</span></td>

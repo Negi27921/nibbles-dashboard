@@ -713,12 +713,12 @@ app.get('/api/dashboard', async (req, res) => {
     recentRuns: runs,
     generatedContent: content,
     stats: {
-      totalArticles: 51,
-      optimizedArticles: 7,
-      remainingArticles: 44,
-      daysToComplete: Math.ceil(44 / 3),
+      totalArticles: 52,
+      optimizedArticles: 10,
+      remainingArticles: 42,
+      daysToComplete: Math.ceil(42 / 3),
       totalWorkflows: 14,
-      newThisWeek: 1,
+      newThisWeek: 2,
       completedRuns: runs.filter(r => r.status === 'completed').length
     },
     products: [
